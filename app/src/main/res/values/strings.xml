@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">JectpackDemoKotlin</string>
+    <string name="please_input_city_name">请输入城市名称</string>
+    <string name="txt_query_weather">查询天气</string>
+    <string name="query_news">获取新闻</string>
+    <string name="txt_weather">天气</string>
+    <string name="txt_news">新闻</string>
+    <string name="txt_day_question">一问</string>
+</resources>

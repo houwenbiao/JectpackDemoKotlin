@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/weatherFragment">
+
+    <!--此处的fragment id需要和menu中的一致才能保证正常跳转-->
+    <fragment
+        android:id="@+id/newsFragment"
+        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.NewsFragment"
+        android:label="NewsFragment" />
+    <fragment
+        android:id="@+id/weatherFragment"
+        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.WeatherFragment"
+        android:label="WeatherFragment" />
+    <fragment
+        android:id="@+id/dayQuestionFragment"
+        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.DayQuestionFragment"
+        android:label="DayQuestionFragment" />
+</navigation>
