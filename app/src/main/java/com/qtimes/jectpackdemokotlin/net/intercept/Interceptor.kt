@@ -8,8 +8,10 @@
 package com.qtimes.jectpackdemokotlin.net.intercept
 
 import com.qtimes.jectpackdemokotlin.net.HttpConfig
-import com.qtimes.jectpackdemokotlin.net.base.ServerResultException
-import okhttp3.*
+import okhttp3.HttpUrl
+import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 
 
@@ -49,26 +51,9 @@ class HeaderInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest: Request = chain.request()
         val requestBuilder: Request.Builder = originalRequest.newBuilder()
-            .addHeader("Accept-Encoding", "gzip")
             .addHeader("Accept", "application/json")
             .addHeader("Content-Type", "application/json; charset=utf-8")
             .method(originalRequest.method, originalRequest.body)
         return chain.proceed(requestBuilder.build())
-    }
-}
-
-class HttpInterceptor : Interceptor {
-    @Throws(IOException::class)
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val req: Request = chain.request()
-        val originalRes: Response = chain.proceed(req)
-        if (originalRes.code != 200) {
-            throw ServerResultException(originalRes.message, originalRes.code)
-        }
-        val source = originalRes.body!!.source()
-        source.request(Int.MAX_VALUE.toLong())
-        val byteStr = source.buffer.snapshot().utf8()
-        val body = ResponseBody.create(null, byteStr)
-        return originalRes.newBuilder().body(body).build()
     }
 }

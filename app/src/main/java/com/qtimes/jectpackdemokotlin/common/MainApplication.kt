@@ -10,16 +10,18 @@ package com.qtimes.jectpackdemokotlin.common
 import android.app.Application
 import android.content.Context
 import androidx.multidex.MultiDex
+import com.qtimes.jectpackdemokotlin.utils.LogUtil
 
 
-class JApplication : Application() {
+class MainApplication : Application() {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(base)
         context = this
+        LogUtil.d("attachBaseContext")
     }
 
     companion object {
-        lateinit var context: JApplication
+        lateinit var context: MainApplication
     }
 }

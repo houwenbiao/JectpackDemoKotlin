@@ -8,43 +8,43 @@
 
 package com.qtimes.jectpackdemokotlin.viewmodel.base
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.qtimes.jectpackdemokotlin.net.base.*
+import com.qtimes.jectpackdemokotlin.net.datasource.WeatherRemoteDataSource
+import kotlinx.coroutines.CoroutineScope
 
 
-open class BaseViewModel : ViewModel(), IBaseViewModel {
+open class BaseViewModel : ViewModel(), IViewModelActionEvent {
 
-    val baseActionEvent = MutableLiveData<ViewModelEvent>()
-    var mNavController: NavController? = null
-    override fun showLoading(msg: String) {
-        val event = ViewModelEvent(ViewModelEvent.SHOW_LOADING_DIALOG)
-        event.message = msg
-        baseActionEvent.postValue(event)
-    }
+    override val lifecycleSupportedScope: CoroutineScope
+        get() = viewModelScope
 
-    override fun dismissLoading() {
-        val event = ViewModelEvent(ViewModelEvent.DISMISS_LOADING_DIALOG)
-        baseActionEvent.postValue(event)
-    }
+    override val showLoadingEventLD = MutableLiveData<ShowLoadingEvent>()
 
-    override fun showToast(msg: String) {
-        val event = ViewModelEvent(ViewModelEvent.SHOW_TOAST)
-        event.message = msg
-        baseActionEvent.postValue(event)
-    }
+    override val dismissLoadingEventLD = MutableLiveData<DismissLoadingEvent>()
 
-    override fun finishView() {
-        val event = ViewModelEvent(ViewModelEvent.FINISH)
-        baseActionEvent.postValue(event)
-    }
+    override val showToastEventLD = MutableLiveData<ShowToastEvent>()
 
-    override fun pop() {
-        val event = ViewModelEvent(ViewModelEvent.POP)
-        baseActionEvent.postValue(event)
-    }
+    override val finishViewEventLD = MutableLiveData<FinishViewEvent>()
 
-    fun setNavController(navController: NavController) {
-        this.mNavController = navController
-    }
+}
+
+open class BaseAndroidViewModel(application: Application) : AndroidViewModel(application),
+    IViewModelActionEvent {
+
+    override val lifecycleSupportedScope: CoroutineScope
+        get() = viewModelScope
+
+    override val showLoadingEventLD = MutableLiveData<ShowLoadingEvent>()
+
+    override val dismissLoadingEventLD = MutableLiveData<DismissLoadingEvent>()
+
+    override val showToastEventLD = MutableLiveData<ShowToastEvent>()
+
+    override val finishViewEventLD = MutableLiveData<FinishViewEvent>()
 }

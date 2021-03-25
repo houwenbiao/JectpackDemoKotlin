@@ -8,29 +8,23 @@
 package com.qtimes.jectpackdemokotlin.model
 
 
-class Weather {
-    var data: InnerWeather? = null
+data class ForecastsBean(
+    val city: String,
+    val adcode: String,
+    val province: String,
+    val reporttime: String,
+    val casts: List<CastsBean>
+)
 
-    class InnerWeather {
-        var weather: List<NearestWeather>? = null
-
-        class NearestWeather {
-            /**
-             * date : 2018-10-26
-             * info : {"dawn":["7","小雨","16","东风","微风","17:13"],"day":["1","多云","22","西北风","3-5级","06:03"],"night":["0","晴","13","西北风","5-6级","17:12"]}
-             * week : 五
-             * nongli : 九月十八
-             */
-            var date: String? = null
-            var info: InfoBean? = null
-            var week: String? = null
-            var nongli: String? = null
-
-            class InfoBean {
-                var dawn: List<String>? = null
-                var day: List<String>? = null
-                var night: List<String>? = null
-            }
-        }
-    }
-}
+data class CastsBean(
+    val date: String,
+    val week: String,
+    val dayweather: String,
+    val nightweather: String,
+    val daytemp: String,
+    val nighttemp: String,
+    val daywind: String,
+    val nightwind: String,
+    val daypower: String,
+    val nightpower: String
+)

@@ -11,22 +11,15 @@ import com.qtimes.jectpackdemokotlin.R
 import com.qtimes.jectpackdemokotlin.databinding.FragmentWeatherBinding
 import com.qtimes.jectpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jectpackdemokotlin.viewmodel.WeatherViewModel
-import com.qtimes.jectpackdemokotlin.viewmodel.base.BaseViewModel
-import com.qtimes.jectpackdemokotlin.viewmodel.base.JViewModelProvider
 
 
 class WeatherFragment : BaseFragment() {
-    lateinit var weatherViewModel: WeatherViewModel
     lateinit var fragmentWeatherBinding: FragmentWeatherBinding
+    private val weatherViewModel by getViewModel(WeatherViewModel::class.java)
+
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_weather
-    }
-
-    override fun initViewModel(): BaseViewModel {
-        weatherViewModel =
-            JViewModelProvider.get(this, WeatherViewModel::class.java, mNavController)
-        return weatherViewModel
     }
 
     override fun bindingSetViewModels() {

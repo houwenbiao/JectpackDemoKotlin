@@ -10,23 +10,39 @@ package com.qtimes.jectpackdemokotlin.ui.base
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.qtimes.jectpackdemokotlin.viewmodel.base.IBaseViewModelEventObserver
+import com.qtimes.jectpackdemokotlin.net.base.IUIActionEventObserver
+import com.qtimes.jectpackdemokotlin.net.base.IViewModelActionEvent
+import com.qtimes.jectpackdemokotlin.utils.LogUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
-abstract class BaseFragment : Fragment(), IBaseViewModelEventObserver {
+abstract class BaseFragment : Fragment(), IUIActionEventObserver {
     lateinit var progressDialog: ProgressDialog
     lateinit var viewDataBinding: ViewDataBinding
     lateinit var mNavController: NavController
+
+    override val lifecycleSupportedScope: CoroutineScope
+        get() = lifecycleScope
+
+    override val lContext: Context?
+        get() = context
+
+    override val lLifecycleOwner: LifecycleOwner
+        get() = this
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,10 +57,9 @@ abstract class BaseFragment : Fragment(), IBaseViewModelEventObserver {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mNavController = Navigation.findNavController(view)
-        progressDialog = ProgressDialog(getCtx())
+        progressDialog = ProgressDialog(context)
         progressDialog.setCancelable(false)
         progressDialog.setCanceledOnTouchOutside(false)
-        observeViewModelEvent()
         bindingSetViewModels()
     }
 
@@ -53,38 +68,41 @@ abstract class BaseFragment : Fragment(), IBaseViewModelEventObserver {
     //ViewDataBinding set model
     protected abstract fun bindingSetViewModels()
 
-    override fun getLifecycleOwner(): LifecycleOwner {
-        return this
-    }
 
-    override fun getCtx(): Context {
-        return this.requireContext()
-    }
-
-    override fun showLoading(msg: String) {
-        progressDialog.setTitle(msg)
+    override fun showLoading(job: Job?) {
+        LogUtil.d("BaseFragment------->showLoading")
         progressDialog.show()
     }
 
     override fun dismissLoading() {
-        if (progressDialog.isShowing) {
-            progressDialog.dismiss()
+        progressDialog.takeIf { it.isShowing }?.dismiss()
+    }
+
+    override fun showToast(msg: String) {
+        if (msg.isNotBlank()) {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun finishView() {
-        activity?.finish()
+
     }
 
-    override fun pop() {
-        mNavController.popBackStack()
-    }
 }
 
-abstract class BaseActivity : AppCompatActivity(), IBaseViewModelEventObserver {
+abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
     lateinit var progressDialog: ProgressDialog
     lateinit var viewDataBinding: ViewDataBinding
     private var mNavController: NavController? = null
+
+    override val lifecycleSupportedScope: CoroutineScope
+        get() = lifecycleScope
+
+    override val lContext: Context?
+        get() = this
+
+    override val lLifecycleOwner: LifecycleOwner
+        get() = this
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +111,6 @@ abstract class BaseActivity : AppCompatActivity(), IBaseViewModelEventObserver {
         progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
         progressDialog.setCanceledOnTouchOutside(false)
-        observeViewModelEvent()
     }
 
 
@@ -106,22 +123,18 @@ abstract class BaseActivity : AppCompatActivity(), IBaseViewModelEventObserver {
     //ViewDataBinding set model
     protected abstract fun bindingSetViewModels()
 
-    override fun getLifecycleOwner(): LifecycleOwner {
-        return this
-    }
-
-    override fun getCtx(): Context {
-        return this
-    }
-
-    override fun showLoading(msg: String) {
-        progressDialog.setTitle(msg)
+    override fun showLoading(job: Job?) {
+        LogUtil.d("BaseActivity------->showLoading")
         progressDialog.show()
     }
 
     override fun dismissLoading() {
-        if (progressDialog.isShowing) {
-            progressDialog.dismiss()
+        progressDialog.takeIf { it.isShowing }?.dismiss()
+    }
+
+    override fun showToast(msg: String) {
+        if (msg.isNotBlank()) {
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -129,7 +142,8 @@ abstract class BaseActivity : AppCompatActivity(), IBaseViewModelEventObserver {
         finish()
     }
 
-    override fun pop() {
-        mNavController?.popBackStack()
+    override fun onDestroy() {
+        super.onDestroy()
+        dismissLoading()
     }
 }

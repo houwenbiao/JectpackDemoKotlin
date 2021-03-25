@@ -15,16 +15,14 @@ import com.qtimes.jectpackdemokotlin.R
 import com.qtimes.jectpackdemokotlin.databinding.ActivityMainBinding
 import com.qtimes.jectpackdemokotlin.ui.base.BaseActivity
 import com.qtimes.jectpackdemokotlin.viewmodel.MainViewModel
-import com.qtimes.jectpackdemokotlin.viewmodel.base.BaseViewModel
-import com.qtimes.jectpackdemokotlin.viewmodel.base.JViewModelProvider
 import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    lateinit var mainViewModel: MainViewModel
     var mNavController: NavController? = null
+    private val mainViewModel by getViewModel(MainViewModel::class.java)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,13 +45,8 @@ class MainActivity : BaseActivity() {
         return R.layout.activity_main
     }
 
-    override fun initViewModel(): BaseViewModel {
-        mainViewModel = JViewModelProvider.get(this, MainViewModel::class.java, NavController(this))
-        return mainViewModel
-    }
-
     override fun bindingSetViewModels() {
         binding = viewDataBinding as ActivityMainBinding
-        binding.mainViewModel = this.mainViewModel
+        binding.mainViewModel = mainViewModel
     }
 }

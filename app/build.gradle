@@ -88,4 +88,7 @@ dependencies {
     implementation "androidx.paging:paging-runtime-ktx:$pagingVersion"
     testImplementation "androidx.paging:paging-common-ktx:$pagingVersion"
     implementation "androidx.paging:paging-rxjava3:$pagingVersion"
+
+    //协程
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
 }
