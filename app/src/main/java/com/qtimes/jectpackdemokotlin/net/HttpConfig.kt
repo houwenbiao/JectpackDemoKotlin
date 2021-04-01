@@ -24,6 +24,9 @@ class HttpConfig {
         //新闻
         const val BASE_URL_NEWS = "http://v.juhe.cn/"
         const val KEY_NEWS = "c3f9d6c4c70559205cab02fb9f8d4a66"
+
+        //Github
+        const val BASE_URL_GITHUB = "https://api.github.com/"
     }
 
     /**
@@ -33,6 +36,7 @@ class HttpConfig {
         companion object {
             const val WEATHER = "weather"
             const val NEWS = "news"
+            const val REPOSITORY = "repository"
         }
     }
 

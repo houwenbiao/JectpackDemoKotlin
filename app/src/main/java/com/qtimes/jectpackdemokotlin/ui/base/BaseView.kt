@@ -38,7 +38,7 @@ abstract class BaseFragment : Fragment(), IUIActionEventObserver {
     override val lifecycleSupportedScope: CoroutineScope
         get() = lifecycleScope
 
-    override val lContext: Context?
+    override val mContext: Context?
         get() = context
 
     override val lLifecycleOwner: LifecycleOwner
@@ -98,7 +98,7 @@ abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
     override val lifecycleSupportedScope: CoroutineScope
         get() = lifecycleScope
 
-    override val lContext: Context?
+    override val mContext: Context?
         get() = this
 
     override val lLifecycleOwner: LifecycleOwner

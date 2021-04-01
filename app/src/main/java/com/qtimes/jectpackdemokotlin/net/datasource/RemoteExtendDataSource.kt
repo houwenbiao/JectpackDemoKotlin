@@ -16,10 +16,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
 
-abstract class RemoteExtendDataSource<Api : Any>(
+abstract class RemoteExtendDataSource<Api : Any, P : Any>(
     iuiActionEvent: IUIActionEvent,
     apiServiceClass: Class<Api>
-) : RemoteDataSource<Api>(iuiActionEvent, apiServiceClass) {
+) : RemoteDataSource<Api, P>(iuiActionEvent, apiServiceClass) {
 
     fun <DataA, DataB> enqueue(
         apiFunA: suspend Api.() -> IHttpResponse<DataA>,

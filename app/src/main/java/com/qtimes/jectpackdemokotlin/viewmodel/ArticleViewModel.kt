@@ -1,18 +1,26 @@
 /**
  * Created with JackHou
- * Date: 2021/3/22
- * Time: 19:42
- * Description:
+ * Date: 2021/4/1
+ * Time: 14:05
+ * Description:Article相关的ViewModel层业务代码
  */
 
 package com.qtimes.jectpackdemokotlin.viewmodel
 
-import androidx.lifecycle.MutableLiveData
-import com.kuky.demo.wan.android.entity.HotKeyData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.qtimes.jectpackdemokotlin.model.GithubRepository
+import com.qtimes.jectpackdemokotlin.repository.ArticleRepository
 import com.qtimes.jectpackdemokotlin.viewmodel.base.BaseViewModel
+import kotlinx.coroutines.flow.Flow
 
 
-class ArticleViewModel :
-    BaseViewModel() {
-    private var hotKeys: MutableLiveData<MutableList<HotKeyData>> = MutableLiveData()
+class ArticleViewModel : BaseViewModel() {
+
+    private val articleRepository = ArticleRepository(this)
+
+    fun queryGithubRepository(): Flow<PagingData<GithubRepository>> {
+        return articleRepository.queryRepository().cachedIn(viewModelScope)
+    }
 }

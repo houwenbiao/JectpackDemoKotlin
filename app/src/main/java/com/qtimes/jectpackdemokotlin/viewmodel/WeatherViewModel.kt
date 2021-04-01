@@ -8,17 +8,31 @@
 package com.qtimes.jectpackdemokotlin.viewmodel
 
 import androidx.lifecycle.MutableLiveData
+import com.qtimes.jectpackdemokotlin.model.DistrictBean
 import com.qtimes.jectpackdemokotlin.repository.WeatherRepository
 import com.qtimes.jectpackdemokotlin.utils.LogUtil
 import com.qtimes.jectpackdemokotlin.viewmodel.base.BaseViewModel
 import java.util.function.Consumer
 
 
-class WeatherViewModel :
-    BaseViewModel() {
+class WeatherViewModel : BaseViewModel() {
     var weatherRepository: WeatherRepository = WeatherRepository(this)
 
     var cityName = MutableLiveData<String>()
+    var mProvinces = MutableLiveData<List<DistrictBean>>()
+
+    fun queryProvince() {
+        weatherRepository.queryProvince {
+            onSuccess {
+                mProvinces.postValue(it)
+                it.forEach { it1 ->
+                    LogUtil.d(it1.name)
+                }
+
+            }
+
+        }
+    }
 
     fun queryWeather() {
         cityName.value?.let { it ->

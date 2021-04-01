@@ -7,6 +7,8 @@
 
 package com.qtimes.jectpackdemokotlin.ui.fragment
 
+import android.os.Bundle
+import android.view.View
 import com.qtimes.jectpackdemokotlin.R
 import com.qtimes.jectpackdemokotlin.databinding.FragmentWeatherBinding
 import com.qtimes.jectpackdemokotlin.ui.base.BaseFragment
@@ -17,6 +19,10 @@ class WeatherFragment : BaseFragment() {
     lateinit var fragmentWeatherBinding: FragmentWeatherBinding
     private val weatherViewModel by getViewModel(WeatherViewModel::class.java)
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        weatherViewModel.queryProvince()
+    }
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_weather

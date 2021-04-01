@@ -8,7 +8,10 @@
 package com.qtimes.jectpackdemokotlin.net.datasource
 
 import android.util.LruCache
+import android.widget.Toast
+import androidx.paging.PagingSource
 import com.qtimes.jectpackdemokotlin.BuildConfig
+import com.qtimes.jectpackdemokotlin.common.MainApplication
 import com.qtimes.jectpackdemokotlin.net.HttpConfig
 import com.qtimes.jectpackdemokotlin.net.base.*
 import com.qtimes.jectpackdemokotlin.net.intercept.FilterInterceptor
@@ -28,10 +31,10 @@ import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 
-abstract class BaseRemoteDataSource<T : Any>(
-    val iuiActionEvent: IUIActionEvent?,
+abstract class BaseRemoteDataSource<T : Any, P : Any>(
+    val iUIActionEvent: IUIActionEvent?,
     val apiServiceClass: Class<T>
-) : ICoroutineEvent {
+) : ICoroutineEvent, PagingSource<Int, P>() {
     companion object {
         //Api service 缓存
         private val apiServiceCache = LruCache<String, Any>(30)
@@ -74,7 +77,7 @@ abstract class BaseRemoteDataSource<T : Any>(
      * 和生命周期绑定的协程作用域
      */
     override val lifecycleSupportedScope: CoroutineScope
-        get() = iuiActionEvent?.lifecycleSupportedScope ?: GlobalScope
+        get() = iUIActionEvent?.lifecycleSupportedScope ?: GlobalScope
 
     /**
      * 由子类实现此字段以便获取 baseUrl
@@ -194,14 +197,16 @@ abstract class BaseRemoteDataSource<T : Any>(
     }
 
     protected fun showLoading(job: Job?) {
-        LogUtil.d("ds---->showloading, " + iuiActionEvent)
-        iuiActionEvent?.showLoading(job)
+        LogUtil.d("ds---->showloading, " + iUIActionEvent)
+        iUIActionEvent?.showLoading(job)
     }
 
     protected fun dismissLoading() {
-        iuiActionEvent?.dismissLoading()
+        iUIActionEvent?.dismissLoading()
     }
 
-    abstract fun showToast(msg: String)
+    protected fun showToast(msg: String) {
+        Toast.makeText(MainApplication.context, msg, Toast.LENGTH_LONG).show()
+    }
 
 }

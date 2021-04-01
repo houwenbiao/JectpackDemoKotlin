@@ -17,7 +17,7 @@ class HttpResponse<T>(
         alternate = ["error_code"]
     ) var code: Int = HttpConfig.HttpCode.CODE_UNKNOWN,
     @SerializedName(value = "info", alternate = ["reason"]) var msg: String? = null,
-    @SerializedName(value = "forecasts", alternate = ["districts", "result"]) var data: T,
+    @SerializedName(value = "forecasts", alternate = ["districts", "result", "items"]) var data: T,
 ) : IHttpResponse<T> {
 
     override val errorCode: Int

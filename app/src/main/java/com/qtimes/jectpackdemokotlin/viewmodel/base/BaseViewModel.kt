@@ -13,9 +13,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.qtimes.jectpackdemokotlin.net.base.*
-import com.qtimes.jectpackdemokotlin.net.datasource.WeatherRemoteDataSource
 import kotlinx.coroutines.CoroutineScope
 
 

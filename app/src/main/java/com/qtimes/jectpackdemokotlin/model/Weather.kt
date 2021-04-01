@@ -28,3 +28,11 @@ data class CastsBean(
     val daypower: String,
     val nightpower: String
 )
+
+data class DistrictBean(
+    val adcode: String,
+    val center: String,
+    val level: String,
+    val name: String,
+    val districts: List<DistrictBean>
+)

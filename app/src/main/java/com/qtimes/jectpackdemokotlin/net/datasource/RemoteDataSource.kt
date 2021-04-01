@@ -11,10 +11,10 @@ import com.qtimes.jectpackdemokotlin.net.base.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 
-abstract class RemoteDataSource<Api : Any>(
+abstract class RemoteDataSource<Api : Any, P : Any>(
     iuiActionEvent: IUIActionEvent,
     apiServiceClass: Class<Api>
-) : BaseRemoteDataSource<Api>(iuiActionEvent, apiServiceClass) {
+) : BaseRemoteDataSource<Api, P>(iuiActionEvent, apiServiceClass) {
 
 
     fun <Data> enqueueLoading(

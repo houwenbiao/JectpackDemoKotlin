@@ -47,7 +47,7 @@ interface IViewModelActionEvent : IUIActionEvent {
 
 interface IUIActionEventObserver : IUIActionEvent {
 
-    val lContext: Context?
+    val mContext: Context?
 
     val lLifecycleOwner: LifecycleOwner
 

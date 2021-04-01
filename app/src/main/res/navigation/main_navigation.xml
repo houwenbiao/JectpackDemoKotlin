@@ -15,6 +15,6 @@
         android:label="WeatherFragment" />
     <fragment
         android:id="@+id/dayQuestionFragment"
-        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.DayQuestionFragment"
+        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.GithubRepositoryFragment"
         android:label="DayQuestionFragment" />
 </navigation>
