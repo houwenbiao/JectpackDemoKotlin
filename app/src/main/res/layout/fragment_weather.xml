@@ -6,7 +6,7 @@
 
         <variable
             name="weatherViewModel"
-            type="com.qtimes.jectpackdemokotlin.viewmodel.WeatherViewModel" />
+            type="com.qtimes.jetpackdemokotlin.viewmodel.WeatherViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

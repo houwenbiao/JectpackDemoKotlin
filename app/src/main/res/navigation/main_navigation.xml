@@ -7,14 +7,14 @@
     <!--此处的fragment id需要和menu中的一致才能保证正常跳转-->
     <fragment
         android:id="@+id/newsFragment"
-        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.NewsFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.NewsFragment"
         android:label="NewsFragment" />
     <fragment
         android:id="@+id/weatherFragment"
-        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.WeatherFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.WeatherFragment"
         android:label="WeatherFragment" />
     <fragment
         android:id="@+id/dayQuestionFragment"
-        android:name="com.qtimes.jectpackdemokotlin.ui.fragment.GithubRepositoryFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.GithubRepositoryFragment"
         android:label="DayQuestionFragment" />
 </navigation>
