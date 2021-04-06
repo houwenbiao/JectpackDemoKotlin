@@ -49,7 +49,7 @@ interface IUIActionEventObserver : IUIActionEvent {
 
     val mContext: Context?
 
-    val lLifecycleOwner: LifecycleOwner
+    val mLifecycleOwner: LifecycleOwner
 
     fun <VM> getViewModel(
         clazz: Class<VM>,
@@ -66,7 +66,7 @@ interface IUIActionEventObserver : IUIActionEvent {
         factory: ViewModelProvider.Factory? = null,
         initializer: (VM.(lifecycleOwner: LifecycleOwner) -> Unit)? = null
     ): VM where VM : ViewModel, VM : IViewModelActionEvent {
-        return when (val localValue = lLifecycleOwner) {
+        return when (val localValue = mLifecycleOwner) {
             is ViewModelStoreOwner -> {
                 if (factory == null) {
                     ViewModelProvider(localValue).get(clazz)
@@ -79,23 +79,23 @@ interface IUIActionEventObserver : IUIActionEvent {
             }
         }.apply {
             generateActionEvent(this)
-            initializer?.invoke(this, lLifecycleOwner)
+            initializer?.invoke(this, mLifecycleOwner)
         }
     }
 
     fun <VM> generateActionEvent(viewModel: VM) where VM : ViewModel, VM : IViewModelActionEvent {
-        viewModel.showLoadingEventLD.observe(lLifecycleOwner, Observer {
+        viewModel.showLoadingEventLD.observe(mLifecycleOwner, Observer {
             showLoading(it.job)
         })
-        viewModel.dismissLoadingEventLD.observe(lLifecycleOwner, Observer {
+        viewModel.dismissLoadingEventLD.observe(mLifecycleOwner, Observer {
             dismissLoading()
         })
-        viewModel.showToastEventLD.observe(lLifecycleOwner, Observer {
+        viewModel.showToastEventLD.observe(mLifecycleOwner, Observer {
             if (it.message.isNotBlank()) {
                 showToast(it.message)
             }
         })
-        viewModel.finishViewEventLD.observe(lLifecycleOwner, Observer {
+        viewModel.finishViewEventLD.observe(mLifecycleOwner, Observer {
             finishView()
         })
     }

@@ -21,7 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.qtimes.jetpackdemokotlin.net.base.IUIActionEventObserver
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import kotlinx.coroutines.CoroutineScope
@@ -38,8 +38,8 @@ abstract class BaseFragment : Fragment(), IUIActionEventObserver {
     override val mContext: Context?
         get() = context
 
-    override val lLifecycleOwner: LifecycleOwner
-        get() = this
+    override val mLifecycleOwner: LifecycleOwner
+        get() = viewLifecycleOwner
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,13 +47,13 @@ abstract class BaseFragment : Fragment(), IUIActionEventObserver {
         savedInstanceState: Bundle?
     ): View? {
         viewDataBinding = DataBindingUtil.inflate(inflater, getLayoutId(), container, false)
-        viewDataBinding.lifecycleOwner = this//建立双向绑定的关键
+        viewDataBinding.lifecycleOwner = viewLifecycleOwner//建立双向绑定的关键
         return viewDataBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mNavController = Navigation.findNavController(view)
+        mNavController = findNavController()
         progressDialog = ProgressDialog(context)
         progressDialog.setCancelable(false)
         progressDialog.setCanceledOnTouchOutside(false)
@@ -98,7 +98,7 @@ abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
     override val mContext: Context?
         get() = this
 
-    override val lLifecycleOwner: LifecycleOwner
+    override val mLifecycleOwner: LifecycleOwner
         get() = this
 
     override fun onCreate(savedInstanceState: Bundle?) {

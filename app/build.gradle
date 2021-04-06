@@ -15,8 +15,8 @@ android {
         applicationId "com.qtimes.jectpackdemokotlin"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode 2021040611
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
