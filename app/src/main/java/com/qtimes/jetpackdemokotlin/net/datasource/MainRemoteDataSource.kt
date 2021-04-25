@@ -7,6 +7,7 @@
 
 package com.qtimes.jetpackdemokotlin.net.datasource
 
+import androidx.paging.PagingState
 import com.qtimes.jetpackdemokotlin.model.GithubRepository
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
 import com.qtimes.jetpackdemokotlin.net.base.IUIActionEvent
@@ -21,5 +22,9 @@ class MainRemoteDataSource(iUIActionEvent: IUIActionEvent) :
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GithubRepository> {
         return LoadResult.Error(Exception())
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, GithubRepository>): Int? {
+        return null
     }
 }

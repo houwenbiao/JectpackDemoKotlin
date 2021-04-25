@@ -7,13 +7,20 @@
 
 package com.qtimes.jetpackdemokotlin.ui.activity
 
+import android.os.Bundle
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.ui.base.BaseActivity
+import com.qtimes.jetpackdemokotlin.utils.ScreenUtil
 
 
 class WelcomeActivity : BaseActivity() {
     override fun getLayoutId(): Int {
         return R.layout.activity_welcome
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ScreenUtil.displayMetrics(this)
     }
 
     override fun bindingSetViewModels() {

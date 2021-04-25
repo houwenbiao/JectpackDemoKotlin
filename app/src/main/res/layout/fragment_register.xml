@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -15,48 +14,82 @@
         android:layout_height="match_parent">
 
         <TextView
+            android:id="@+id/txt_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="@string/back"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/x40"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:drawableStartCompat="@drawable/ic_back" />
+
+        <TextView
             android:id="@+id/txt_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/y60"
+            android:gravity="center"
             android:padding="20dp"
-            android:text="@string/txt_welcome_back"
+            android:text="@string/txt_welcome_join_us"
             android:textColor="@color/black"
             android:textSize="28sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.1" />
+            app:layout_constraintTop_toBottomOf="@id/txt_cancel" />
 
         <EditText
-            android:id="@+id/et_account"
+            android:id="@+id/et_email"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="@dimen/y60"
+            android:layout_marginTop="@dimen/y40"
             android:background="@drawable/shape_table_item_edit"
-            android:drawableStart="@drawable/ic_account"
+            android:drawableStart="@drawable/ic_email"
             android:drawablePadding="10dp"
-            android:textSize="@dimen/y30"
-            android:hint="@string/txt_account"
+            android:hint="@string/phone"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:text="@={welcomeViewModel.userName}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/et_pwd"
+            android:text="@={welcomeViewModel.phone}"
+            android:textSize="@dimen/y30"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="0.1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txt_title"
-            app:layout_constraintVertical_bias="0.3"
+            app:layout_constraintTop_toBottomOf="@id/txt_title"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintWidth_default="percent"
             app:layout_constraintWidth_percent="0.8" />
 
         <EditText
+            android:id="@+id/et_account"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/y40"
+            android:background="@drawable/shape_table_item_edit"
+            android:drawableStart="@drawable/ic_account"
+            android:drawablePadding="10dp"
+            android:hint="@string/user_name"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="@={welcomeViewModel.userName}"
             android:textSize="@dimen/y30"
+            app:layout_constraintHeight_default="percent"
+            app:layout_constraintHeight_percent="0.1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_email"
+            app:layout_constraintVertical_bias="0.3"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.8" />
+
+        <EditText
             android:id="@+id/et_pwd"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -65,10 +98,10 @@
             android:drawableStart="@drawable/ic_pwd"
             android:drawablePadding="10dp"
             android:hint="@string/txt_password"
-            android:inputType="textPassword"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:text="@={welcomeViewModel.password}"
+            android:textSize="@dimen/y30"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="0.1"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -79,31 +112,21 @@
 
 
         <Button
-            android:id="@+id/btn_login"
+            android:id="@+id/btn_register"
             android:layout_width="@dimen/x500"
             android:layout_height="@dimen/y100"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="@dimen/y100"
             android:background="@drawable/shape_main_recycle_item_primary"
-            android:text="@string/sign_in"
+            android:text="@string/sign_up"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="@dimen/x24"
+            android:textSize="@dimen/x30"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
-        <TextView
-            android:id="@+id/tv_register"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/y40"
-            android:layout_marginRight="@dimen/x80"
-            android:text="@string/no_account"
-            android:textSize="@dimen/x26"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/et_pwd" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

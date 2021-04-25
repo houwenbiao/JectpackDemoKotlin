@@ -7,6 +7,7 @@
 
 package com.qtimes.jetpackdemokotlin.net.datasource
 
+import androidx.paging.PagingState
 import com.qtimes.jetpackdemokotlin.model.GithubRepository
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
 import com.qtimes.jetpackdemokotlin.net.base.IUIActionEvent
@@ -33,4 +34,9 @@ class ArticleDataSource(iUIActionEvent: IUIActionEvent) :
             LoadResult.Error(e)
         }
     }
+
+    override fun getRefreshKey(state: PagingState<Int, GithubRepository>): Int? {
+        return null
+    }
 }
+

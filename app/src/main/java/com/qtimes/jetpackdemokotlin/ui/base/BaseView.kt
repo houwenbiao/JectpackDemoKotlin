@@ -22,7 +22,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.net.base.IUIActionEventObserver
+import com.qtimes.jetpackdemokotlin.utils.ActivityMgr
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -102,7 +104,9 @@ abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
         get() = this
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         super.onCreate(savedInstanceState)
+        ActivityMgr.addActivity(this)
         viewDataBinding = DataBindingUtil.setContentView(this, getLayoutId())
         mNavController = getNavController()
         progressDialog = ProgressDialog(this)
@@ -139,8 +143,14 @@ abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
         finish()
     }
 
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        ActivityMgr.destroyActivity(this)
         dismissLoading()
     }
 }

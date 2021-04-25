@@ -4,29 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="mainViewModel"
             type="com.qtimes.jetpackdemokotlin.viewmodel.MainViewModel" />
     </data>
 
-    <LinearLayout
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".ui.activity.MainActivity">
+        android:fitsSystemWindows="true"
+        tools:openDrawer="start">
 
-        <fragment
-            android:id="@+id/main_fragment"
-            android:name="androidx.navigation.fragment.NavHostFragment"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/main_navigation" />
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_nav_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:menu="@menu/main_menu" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context=".ui.activity.MainActivity">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/main_fragment"
+                android:name="androidx.navigation.fragment.NavHostFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/main_navigation" />
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottom_nav_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                app:menu="@menu/main_menu" />
+
+        </LinearLayout>
+
+        <com.mikepenz.materialdrawer.widget.MaterialDrawerSliderView
+            android:id="@+id/slider"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:fitsSystemWindows="true" />
+    </androidx.drawerlayout.widget.DrawerLayout>
+
 </layout>

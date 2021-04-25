@@ -2,11 +2,12 @@
  * Created with JackHou
  * Date: 2021/4/1
  * Time: 19:28
- * Description:
+ * Description:用户Dao
  */
 
 package com.qtimes.jetpackdemokotlin.room.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.qtimes.jetpackdemokotlin.model.User
 
@@ -18,23 +19,29 @@ interface UserDao {
      * 注册用户
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun registerUser(user: User): Long
+    suspend fun registerUser(user: User): Long
 
     /**
      * 更新用户信息
      */
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun updateUser(user: User): Int
+    suspend fun updateUser(user: User): Int
 
     /**
      * 注销用户
      */
     @Delete
-    fun unregisterUser(user: User)
+    suspend fun unregisterUser(user: User)
 
     /**
      * 通过Id查找用户
      */
     @Query("select * from user where id =:id")
-    fun findUserById(id: Int): User
+    fun findUserById(id: Int): LiveData<User>
+
+    /**
+     * 通过手机号查找用户
+     */
+    @Query("select * from user where user_phone =:param or user_name =:param")
+    fun findUserByAccountOrPhone(param: String): LiveData<User?>
 }

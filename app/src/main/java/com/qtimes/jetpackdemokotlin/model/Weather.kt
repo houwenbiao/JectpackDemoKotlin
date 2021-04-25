@@ -2,7 +2,7 @@
  * Created with JackHou
  * Date: 2021/3/17
  * Time: 14:19
- * Description:
+ * Description:天气查询时候的实体类
  */
 
 package com.qtimes.jetpackdemokotlin.model

@@ -11,34 +11,61 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.model.User
+import com.qtimes.jetpackdemokotlin.model.UserState
 import com.qtimes.jetpackdemokotlin.room.dao.UserDao
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 
-@Database(entities = [User::class], version = 1, exportSchema = false)
+@Database(entities = [User::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getUserDao(): UserDao
 
     companion object {
 
-        //单例模式
-        val instance: AppDatabase by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
-            buildDatabase()
+        /**
+         * User表添加state字段
+         */
+        private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
+
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("alter table user add column user_state string default ${UserState.OFFLINE.name}")
+            }
         }
 
-        private fun buildDatabase(): AppDatabase {
+        //双重校验单例模式
+        @Volatile
+        private var appDatabase: AppDatabase? = null
+
+        fun getInstance(): AppDatabase {
+            LogUtil.d("AppDatabase getInstance")
+            return appDatabase ?: synchronized(this) {
+                appDatabase ?: buildDatabase(MainApplication.context).also {
+                    appDatabase = it
+                }
+            }
+        }
+
+        private fun buildDatabase(ctx: Context): AppDatabase {
             return Room.databaseBuilder(
-                MainApplication.context,
+                ctx,
                 AppDatabase::class.java,
-                "jetpack_demo_kotlin"
+                ctx.packageName
             )
+                .allowMainThreadQueries()
+                .addMigrations(MIGRATION_1_2)
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
-                        LogUtil.d("Database created")
+                        LogUtil.i("Database created")
+                    }
+
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        LogUtil.i("Database opened, version = ${db.version}")
                     }
                 }).build()
         }

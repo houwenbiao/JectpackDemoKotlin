@@ -9,15 +9,15 @@ plugins {
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.0"
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.qtimes.jectpackdemokotlin"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 2021040611
+        versionCode 21040611
         versionName "1.0.0"
-
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -42,24 +42,34 @@ android {
 
 dependencies {
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
     implementation "androidx.recyclerview:recyclerview:$recyclerviewVersion"
     implementation "androidx.annotation:annotation:$annotationVersion"
-    implementation "androidx.preference:preference:$preferenceVersion"
+    implementation "androidx.preference:preference-ktx:$preferenceVersion"
     testImplementation "junit:junit:4.+"
     androidTestImplementation "androidx.test.ext:junit:$junitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     implementation "com.android.support:multidex:$multidexVersion"
+    implementation "com.google.android.material:material:$materialVersion"
+
+    //DrawerLayout
+    implementation "com.mikepenz:materialdrawer:${materialDrawerVersion}"
+    implementation "com.mikepenz:materialdrawer-nav:${materialDrawerVersion}"
+    implementation "com.mikepenz:materialdrawer-iconics:${materialDrawerVersion}"
+
+    //协程
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+
+    //Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-    implementation "com.google.android.material:material:$materialVersion"
+
+    //lifecycle
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVMVersion"
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
 
     // room
     implementation "androidx.room:room-runtime:$roomVersion"
@@ -80,7 +90,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
 
-    //hilt
+    //dagger-hilt
     implementation "com.google.dagger:hilt-android:$hiltVersion"
     kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
 
@@ -89,6 +99,12 @@ dependencies {
     testImplementation "androidx.paging:paging-common-ktx:$pagingVersion"
     implementation "androidx.paging:paging-rxjava3:$pagingVersion"
 
-    //协程
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    //WorkManager
+    implementation "androidx.work:work-runtime-ktx:$workVersion"
+
+    //FileDownloader
+    implementation "com.liulishuo.filedownloader:library:${fileDownloaderVersion}"
+
+    //DataStore
+    implementation "androidx.datastore:datastore-preferences:${datastoreVersion}"
 }

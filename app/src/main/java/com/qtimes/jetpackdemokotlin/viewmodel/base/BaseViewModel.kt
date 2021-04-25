@@ -32,8 +32,8 @@ open class BaseViewModel : ViewModel(), IViewModelActionEvent {
 
 }
 
-open class BaseAndroidViewModel(application: Application) : AndroidViewModel(application),
-    IViewModelActionEvent {
+open class BaseAndroidViewModel(application: Application) :
+    AndroidViewModel(application), IViewModelActionEvent {
 
     override val lifecycleSupportedScope: CoroutineScope
         get() = viewModelScope

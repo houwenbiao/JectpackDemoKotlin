@@ -3,5 +3,7 @@
     <style name="Theme.JectpackDemoKotlin" parent="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
+        <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
     </style>
 </resources>

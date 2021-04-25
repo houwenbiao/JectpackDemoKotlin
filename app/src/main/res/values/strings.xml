@@ -6,4 +6,16 @@
     <string name="txt_weather">天气</string>
     <string name="txt_news">新闻</string>
     <string name="txt_day_question">一问</string>
+    <string name="sign_up">注册</string>
+    <string name="sign_in">登录</string>
+    <string name="txt_register">注册</string>
+    <string name="no_account">没有账户？现在创建</string>
+    <string name="txt_welcome_back">欢迎再次回来</string>
+    <string name="txt_account">账号或者手机号</string>
+    <string name="txt_password">密码</string>
+    <string name="back">返回</string>
+    <string name="txt_welcome_join_us">欢迎加入我们</string>
+    <string name="user_name">用户名</string>
+    <string name="phone">手机号</string>
+    <string name="exit_toast">再点一次退出</string>
 </resources>

@@ -32,11 +32,12 @@ object DimenUtil {
         makeString(600, 1024)
         makeString(1080, 1920)
         makeString(1080, 2400)
+        makeString(1440, 2392)
+        makeString(1440, 2560)
     }
 
     //获取dimen.xml的文本内容
     private fun makeString(w: Int, h: Int) {
-        println("1111111111")
         val sb = StringBuffer()
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
         sb.append("<resources>")
@@ -72,22 +73,22 @@ object DimenUtil {
 
     //创建文件并写入内容
     private fun makeFile(w: Int, h: Int, text: String) {
-        println("22222222222222")
+        println("Start make dimen file")
         val path = rootPath.replace("{0}", h.toString() + "").replace("{1}", w.toString() + "")
         val rootFile = File(path)
         if (!rootFile.exists()) {
             rootFile.mkdirs()
         }
         val file = File(path, "dimens.xml")
-        println("333333333333333:" + file.absolutePath)
+        println("Make dimen file path:" + file.absolutePath)
         try {
             val pw = PrintWriter(FileOutputStream(file))
             pw.println(text)
             pw.close()
-            println("4444444444444444")
+            println("Make dimen file success")
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
-            println("5555555555555555")
+            println("Make dimen file failed")
         }
     }
 

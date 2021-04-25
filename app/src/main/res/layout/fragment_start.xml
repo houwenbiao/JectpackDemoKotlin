@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:contentDescription="jump desc"
-            android:src="@drawable/bg_welcome"
+            android:src="@mipmap/bg_welcome"
             tools:ignore="MissingConstraints" />
 
         <Button
@@ -45,7 +45,7 @@
             android:text="成年人的世界里哪有容易二字"
             android:textColor="@color/txt_welcome_title"
             android:textSize="@dimen/x28"
-            app:layout_constraintBottom_toBottomOf="@id/start_bg" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
