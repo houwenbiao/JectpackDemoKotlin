@@ -9,7 +9,6 @@ package com.qtimes.jetpackdemokotlin.common
 
 import android.app.Application
 import android.content.Context
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.multidex.MultiDex
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 

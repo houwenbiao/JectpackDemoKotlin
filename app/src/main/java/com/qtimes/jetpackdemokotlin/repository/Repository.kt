@@ -11,10 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.qtimes.jetpackdemokotlin.model.DistrictBean
-import com.qtimes.jetpackdemokotlin.model.ForecastsBean
-import com.qtimes.jetpackdemokotlin.model.GithubRepository
-import com.qtimes.jetpackdemokotlin.model.User
+import com.qtimes.jetpackdemokotlin.model.*
 import com.qtimes.jetpackdemokotlin.net.base.IUIActionEvent
 import com.qtimes.jetpackdemokotlin.net.base.RequestCallback
 import com.qtimes.jetpackdemokotlin.net.datasource.ArticleDataSource
@@ -46,6 +43,23 @@ class WeatherRepository(iUIActionEvent: IUIActionEvent) : BaseRepository(iUIActi
 }
 
 /**
+ * 设备相关Repository
+ */
+class DeviceRepository(iUIActionEvent: IUIActionEvent) :
+    BaseRepository(iUIActionEvent) {
+
+    fun authenticateDevice(
+        authenticateBody: AuthenticateBody,
+        callbackFun: (RequestCallback<AuthenticateRsp>.() -> Unit)?
+    ) {
+        mainRemoteDataSource.enqueueLoading(
+            { authenticateDev(authenticateBody) },
+            callbackFun = callbackFun
+        )
+    }
+}
+
+/**
  * 文章相关Repository
  */
 class ArticleRepository(private val iUIActionEvent: IUIActionEvent) :
@@ -65,7 +79,7 @@ class ArticleRepository(private val iUIActionEvent: IUIActionEvent) :
  * 用户相关Repository
  */
 class UserRepository(
-    private val iUIActionEvent: IUIActionEvent,
+    iUIActionEvent: IUIActionEvent,
     private val appDatabase: AppDatabase
 ) : BaseRepository(iUIActionEvent) {
 

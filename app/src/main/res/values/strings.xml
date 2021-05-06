@@ -1,9 +1,7 @@
 <resources>
     <string name="app_name">JectpackDemoKotlin</string>
     <string name="please_input_city_name">请输入城市名称</string>
-    <string name="txt_query_weather">查询天气</string>
     <string name="query_news">获取新闻</string>
-    <string name="txt_weather">天气</string>
     <string name="txt_news">新闻</string>
     <string name="txt_day_question">一问</string>
     <string name="sign_up">注册</string>
@@ -18,4 +16,17 @@
     <string name="user_name">用户名</string>
     <string name="phone">手机号</string>
     <string name="exit_toast">再点一次退出</string>
+
+
+    <string name="txt_activate_page">设备激活界面</string>
+
+    <!--device相关-->
+    <string name="dev">设备</string>
+    <string name="dev_status_unauthenticated">"设备未认证"</string>
+    <string name="dev_status_authenticating">"设备认证中......\n请勿断开电源！"</string>
+    <string name="dev_status_authenticated">"设备已认证"</string>
+    <string name="dev_status_authenticate_failed">"设备认证失败"</string>
+
+    <string name="dev_action_atc_again"><u>重新认证</u></string>
+    <string name="dev_action_start_activate">开始激活</string>
 </resources>

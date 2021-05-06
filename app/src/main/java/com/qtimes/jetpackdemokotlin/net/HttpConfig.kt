@@ -27,6 +27,14 @@ class HttpConfig {
 
         //Github
         const val BASE_URL_GITHUB = "https://api.github.com/"
+
+        //Qtimes服务
+        const val QTIMES_URL_API = "https://api.qtimes.cc:8080"
+        const val QTIMES_URL_FILE = "http://file.qtimes.cc:8091"
+
+        //域名校验
+        const val HOST_REGEX = "*.qtimes.cc"
+
     }
 
     /**

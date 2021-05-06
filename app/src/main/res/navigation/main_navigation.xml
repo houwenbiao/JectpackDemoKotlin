@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/weatherFragment">
+    app:startDestination="@id/deviceFragment">
 
     <!--此处的fragment id需要和menu中的一致才能保证正常跳转-->
     <fragment
@@ -10,11 +10,23 @@
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.NewsFragment"
         android:label="NewsFragment" />
     <fragment
-        android:id="@+id/weatherFragment"
-        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.WeatherFragment"
-        android:label="WeatherFragment" />
+        android:id="@+id/deviceFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.DeviceFragment"
+        android:label="DeviceFragment">
+        <action
+            android:id="@+id/action_deviceFragment_to_atcFragment"
+            app:destination="@id/atcFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
     <fragment
         android:id="@+id/dayQuestionFragment"
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.GithubRepositoryFragment"
         android:label="DayQuestionFragment" />
+    <fragment
+        android:id="@+id/atcFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.AtcFragment"
+        android:label="AtcFragment" />
 </navigation>

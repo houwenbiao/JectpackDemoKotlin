@@ -7,17 +7,26 @@
 
 package com.qtimes.jetpackdemokotlin.net.service
 
-import com.qtimes.jetpackdemokotlin.model.DistrictBean
-import com.qtimes.jetpackdemokotlin.model.ForecastsBean
-import com.qtimes.jetpackdemokotlin.model.GithubRepository
+import com.qtimes.jetpackdemokotlin.model.*
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
 import com.qtimes.jetpackdemokotlin.net.base.HttpResponse
-import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.Query
+import retrofit2.http.*
 
 
 interface ApiService {
+
+    /**
+     * 设备认证
+     */
+    @POST("device/activate")
+    suspend fun authenticateDev(@Body body: AuthenticateBody): HttpResponse<AuthenticateRsp>
+
+    /**
+     * 获取门类型列表
+     */
+    @GET("device/doorList")
+    suspend fun getDoorList(@Query("did") deviceId: String): HttpResponse<List<DoorInfo>>
+
 
     /**
      * 查询省份

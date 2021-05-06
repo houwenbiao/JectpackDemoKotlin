@@ -9,5 +9,16 @@ package com.qtimes.jetpackdemokotlin.common
 
 
 object Const {
+    //user
     const val KEY_USER_STATE = "key_user_state"
+
+    //device
+    const val KEY_DEVICE_NAME = "device_name"
+    const val KEY_PRODUCT_KEY = "product_key"
+    const val KEY_DEVICE_SECRET = "device_secret"
+
+    //JPush
+    const val KEY_PUSH_ID = "key_push_id"
+
+
 }

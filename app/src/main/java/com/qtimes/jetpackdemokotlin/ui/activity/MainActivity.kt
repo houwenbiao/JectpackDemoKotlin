@@ -17,8 +17,13 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.mikepenz.materialdrawer.model.DividerDrawerItem
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem
+import com.mikepenz.materialdrawer.model.interfaces.descriptionText
+import com.mikepenz.materialdrawer.model.interfaces.iconRes
 import com.mikepenz.materialdrawer.model.interfaces.nameRes
+import com.mikepenz.materialdrawer.model.interfaces.nameText
+import com.mikepenz.materialdrawer.widget.AccountHeaderView
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.databinding.ActivityMainBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseActivity
@@ -29,10 +34,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    var mNavController: NavController? = null
+    private var mNavController: NavController? = null
     private val mainViewModel by getViewModel(MainViewModel::class.java)
-    var mExitTime: Long = 0
-    var mLastBackClickTime: Long = 0
+    private var mExitTime: Long = 0
+    private var mLastBackClickTime: Long = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +54,14 @@ class MainActivity : BaseActivity() {
         val item1 = PrimaryDrawerItem().apply { nameRes = R.string.app_name; identifier = 1 }
         val item2 = SecondaryDrawerItem().apply { nameRes = R.string.user_name; identifier = 2 }
         slider.itemAdapter.add(item1, DividerDrawerItem(), item2, SecondaryDrawerItem())
+        slider.accountHeader = AccountHeaderView(this).apply {
+            addProfiles(ProfileDrawerItem().apply {
+                nameText = "Jack Hou"; descriptionText = "jackhou1990@163.com"; iconRes =
+                R.drawable.ic_account; identifier = 102
+            })
+            onAccountHeaderListener = { view, profile, current -> false }
+            withSavedInstance(savedInstanceState)
+        }
     }
 
 

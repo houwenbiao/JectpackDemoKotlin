@@ -18,7 +18,7 @@ class MainRemoteDataSource(iUIActionEvent: IUIActionEvent) :
     RemoteExtendDataSource<ApiService, GithubRepository>(iUIActionEvent, ApiService::class.java) {
 
     override val baseUrl: String
-        get() = HttpConfig.BASE_URL_WEATHER
+        get() = HttpConfig.QTIMES_URL_API
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GithubRepository> {
         return LoadResult.Error(Exception())

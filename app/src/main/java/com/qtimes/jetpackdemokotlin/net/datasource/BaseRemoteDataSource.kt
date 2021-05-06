@@ -11,8 +11,10 @@ import android.util.LruCache
 import android.widget.Toast
 import androidx.paging.PagingSource
 import com.qtimes.jetpackdemokotlin.BuildConfig
+import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
+import com.qtimes.jetpackdemokotlin.net.HttpsUtil
 import com.qtimes.jetpackdemokotlin.net.base.*
 import com.qtimes.jetpackdemokotlin.net.intercept.FilterInterceptor
 import com.qtimes.jetpackdemokotlin.net.intercept.HeaderInterceptor
@@ -25,15 +27,18 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.InputStream
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.HttpsURLConnection
 
 
 abstract class BaseRemoteDataSource<T : Any, P : Any>(
-    val iUIActionEvent: IUIActionEvent?,
-    val apiServiceClass: Class<T>
+    private val iUIActionEvent: IUIActionEvent?,
+    private val apiServiceClass: Class<T>
 ) : ICoroutineEvent, PagingSource<Int, P>() {
     companion object {
         //Api service 缓存
@@ -57,7 +62,108 @@ abstract class BaseRemoteDataSource<T : Any, P : Any>(
                 httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
                 builder.addInterceptor(httpLoggingInterceptor)
             }
+
+            //https域名校验
+            builder.hostnameVerifier { hostname, session ->
+                /*域名校验---首先检验是否是我们信任的域名然后再检验域名和服务端传输过来的证书里的域名(CN)是否一致*/
+                LogUtil.d("hostname: $hostname")
+                var trust: Boolean = verifyHostname(hostname, HttpConfig.HOST_REGEX)
+                if (trust) {
+                    val hv = HttpsURLConnection.getDefaultHostnameVerifier()
+                    trust = hv.verify(hostname, session)
+                }
+                trust
+            }
+
+            var qtimesIs: InputStream? = null
+            qtimesIs = MainApplication.context.resources.openRawResource(R.raw.server)
+            val sslParams: HttpsUtil.Companion.SSLParams =
+                HttpsUtil.getSslSocketFactory(arrayOf(qtimesIs!!), null, null)
+            builder.sslSocketFactory(sslParams.socketFactory!!, sslParams.trustManager!!)
             builder.build()
+        }
+
+
+        private fun verifyHostname(hostname: String, pattern: String): Boolean {
+            var hostname: String? = hostname
+            var pattern: String? = pattern
+            if (hostname == null || hostname.isEmpty() || hostname.startsWith(".")
+                || hostname.endsWith("..")
+            ) {
+                // Invalid domain name
+                return false
+            }
+            if (pattern == null || pattern.isEmpty() || pattern.startsWith(".")
+                || pattern.endsWith("..")
+            ) {
+                // Invalid pattern/domain name
+                return false
+            }
+
+            // Normalize hostname and pattern by turning them into absolute domain names if they are not
+            // yet absolute. This is needed because server certificates do not normally contain absolute
+            // names or patterns, but they should be treated as absolute. At the same time, any hostname
+            // presented to this method should also be treated as absolute for the purposes of matching
+            // to the server certificate.
+            //   www.android.com  matches www.android.com
+            //   www.android.com  matches www.android.com.
+            //   www.android.com. matches www.android.com.
+            //   www.android.com. matches www.android.com
+            if (!hostname.endsWith(".")) {
+                hostname += '.'
+            }
+            if (!pattern.endsWith(".")) {
+                pattern += '.'
+            }
+            // hostname and pattern are now absolute domain names.
+            pattern = pattern.toLowerCase(Locale.US)
+            // hostname and pattern are now in lower case -- domain names are case-insensitive.
+            if (!pattern.contains("*")) {
+                // Not a wildcard pattern -- hostname and pattern must match exactly.
+                return hostname == pattern
+            }
+            // Wildcard pattern
+
+            // WILDCARD PATTERN RULES:
+            // 1. Asterisk (*) is only permitted in the left-most domain name label and must be the
+            //    only character in that label (i.e., must match the whole left-most label).
+            //    For example, *.example.com is permitted, while *a.example.com, a*.example.com,
+            //    a*b.example.com, a.*.example.com are not permitted.
+            // 2. Asterisk (*) cannot match across domain name labels.
+            //    For example, *.example.com matches test.example.com but does not match
+            //    sub.test.example.com.
+            // 3. Wildcard patterns for single-label domain names are not permitted.
+            if (!pattern.startsWith("*.") || pattern.indexOf('*', 1) != -1) {
+                // Asterisk (*) is only permitted in the left-most domain name label and must be the only
+                // character in that label
+                return false
+            }
+
+            // Optimization: check whether hostname is too short to match the pattern. hostName must be at
+            // least as long as the pattern because asterisk must match the whole left-most label and
+            // hostname starts with a non-empty label. Thus, asterisk has to match one or more characters.
+            if (hostname.length < pattern.length) {
+                // hostname too short to match the pattern.
+                return false
+            }
+            if ("*." == pattern) {
+                // Wildcard pattern for single-label domain name -- not permitted.
+                return false
+            }
+
+            // hostname must end with the region of pattern following the asterisk.
+            val suffix = pattern.substring(1)
+            if (!hostname.endsWith(suffix)) {
+                // hostname does not end with the suffix
+                return false
+            }
+
+            // Check that asterisk did not match across domain name labels.
+            val suffixStartIndexInHostname = hostname.length - suffix.length
+            return !(suffixStartIndexInHostname > 0
+                    && hostname.lastIndexOf('.', suffixStartIndexInHostname - 1) != -1)
+
+            // hostname matches pattern
         }
 
         /**
@@ -197,7 +303,7 @@ abstract class BaseRemoteDataSource<T : Any, P : Any>(
     }
 
     protected fun showLoading(job: Job?) {
-        LogUtil.d("ds---->showloading, " + iUIActionEvent)
+        LogUtil.d("showloading, $iUIActionEvent")
         iUIActionEvent?.showLoading(job)
     }
 
@@ -205,8 +311,7 @@ abstract class BaseRemoteDataSource<T : Any, P : Any>(
         iUIActionEvent?.dismissLoading()
     }
 
-    protected fun showToast(msg: String) {
+    private fun showToast(msg: String) {
         Toast.makeText(MainApplication.context, msg, Toast.LENGTH_LONG).show()
     }
-
 }

@@ -14,10 +14,13 @@ import com.qtimes.jetpackdemokotlin.net.HttpConfig
 class HttpResponse<T>(
     @SerializedName(
         value = "status",
-        alternate = ["error_code"]
+        alternate = ["error_code", "code"]
     ) var code: Int = HttpConfig.HttpCode.CODE_UNKNOWN,
-    @SerializedName(value = "info", alternate = ["reason"]) var msg: String? = null,
-    @SerializedName(value = "forecasts", alternate = ["districts", "result", "items"]) var data: T,
+    @SerializedName(value = "info", alternate = ["reason", "msg"]) var msg: String? = null,
+    @SerializedName(
+        value = "forecasts",
+        alternate = ["districts", "result", "items", "data"]
+    ) var data: T,
 ) : IHttpResponse<T> {
 
     override val errorCode: Int
