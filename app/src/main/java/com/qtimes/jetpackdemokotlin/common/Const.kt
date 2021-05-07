@@ -20,5 +20,7 @@ object Const {
     //JPush
     const val KEY_PUSH_ID = "key_push_id"
 
+    //loading
+    const val LOADING_TIMEOUT = 1_000//下拉刷新的超时时间
 
 }

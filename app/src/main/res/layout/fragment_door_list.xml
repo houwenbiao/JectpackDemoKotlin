@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="doorListVM"
+            type="com.qtimes.jetpackdemokotlin.viewmodel.DoorListViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/door_list_back"
+            layout="@layout/back_layout" />
+
+        <com.scwang.smart.refresh.layout.SmartRefreshLayout
+            android:layout_marginTop="@dimen/y80"
+            android:id="@+id/door_list_srl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toBottomOf="@id/door_list_back">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/y80">
+
+                <TextView
+                    android:id="@+id/txt_door_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/y80"
+                    android:background="@color/theme_color"
+                    android:gravity="center"
+                    android:text="@string/chose_door_type"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.qtimes.jetpackdemokotlin.ui.views.MaxHeightScrollView
+                    android:id="@+id/msv_door_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/txt_door_title"
+                    custom:max_height="@dimen/y720">
+
+                    <RadioGroup
+                        android:id="@+id/rg_door_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/white"
+                        android:paddingStart="@dimen/x28"
+                        android:paddingTop="@dimen/y20"
+                        android:paddingEnd="@dimen/x28" />
+                </com.qtimes.jetpackdemokotlin.ui.views.MaxHeightScrollView>
+
+                <Button
+                    android:id="@+id/btn_door_type_next_step"
+                    android:layout_width="@dimen/x240"
+                    android:layout_height="@dimen/y70"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/y40"
+                    android:background="@color/btn_unclickable"
+                    android:clickable="@{doorListVM.doors.size()>0}"
+                    android:text="@string/next_step"
+                    android:textColor="@color/ticket_button_text"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/msv_door_list" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

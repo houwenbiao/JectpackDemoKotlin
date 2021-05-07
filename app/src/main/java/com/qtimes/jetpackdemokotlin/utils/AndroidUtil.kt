@@ -55,7 +55,7 @@ object AndroidUtil {
      */
     fun getPCBVersion(): String {
         val v = getPCBVoltage()
-        val voltage = v.toInt()
+        val voltage = if (v.isNotEmpty()) v.toInt() else 1000
         if (voltage >= 900) {
             return "1.0"
         } else if (voltage > 400) {

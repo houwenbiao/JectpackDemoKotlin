@@ -27,9 +27,13 @@ class ModelInfo(
 /*工单信息*/
 
 class TicketInfo(
-    val ticketId: Int, val ticketType: Int,
-    val status: Int, val userName: String,
-    val userPhone: String, val supportName: String,
-    val supportPhone: String, val info: String,
+    val ticketId: Int,
+    val ticketType: Int,
+    val status: Int,
+    val userName: String,
+    val userPhone: String,
+    val supportName: String,
+    val supportPhone: String,
+    val info: String,
     val deviceName: String
-)
+) : Serializable

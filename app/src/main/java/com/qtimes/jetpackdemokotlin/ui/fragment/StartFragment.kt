@@ -13,7 +13,6 @@ import android.view.View
 import androidx.lifecycle.asLiveData
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.Const
-import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.databinding.FragmentStartBinding
 import com.qtimes.jetpackdemokotlin.model.UserState
 import com.qtimes.jetpackdemokotlin.ui.activity.MainActivity

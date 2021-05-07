@@ -20,6 +20,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <include layout="@layout/back_layout" />
+
         <TextView
             android:id="@+id/txt_atc_status"
             android:layout_width="wrap_content"

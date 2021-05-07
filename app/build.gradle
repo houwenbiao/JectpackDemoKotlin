@@ -107,4 +107,20 @@ dependencies {
 
     //DataStore
     implementation "androidx.datastore:datastore-preferences:${datastoreVersion}"
+
+    //SmartRefreshLayout
+    implementation "com.scwang.smart:refresh-layout-kernel:${smartRefreshVersion}"      //核心必须依赖
+    implementation "com.scwang.smart:refresh-header-classics:${smartRefreshVersion}"    //经典刷新头
+    implementation "com.scwang.smart:refresh-header-radar:${smartRefreshVersion}"       //雷达刷新头
+    implementation "com.scwang.smart:refresh-header-falsify:${smartRefreshVersion}"     //虚拟刷新头
+    implementation "com.scwang.smart:refresh-header-material:${smartRefreshVersion}"    //谷歌刷新头
+    implementation "com.scwang.smart:refresh-header-two-level:${smartRefreshVersion}"   //二级刷新头
+    implementation "com.scwang.smart:refresh-footer-ball:${smartRefreshVersion}"        //球脉冲加载
+    implementation "com.scwang.smart:refresh-footer-classics:${smartRefreshVersion}"    //经典加载
+
+    //StatusBar
+    implementation("com.github.niorgai:StatusBarCompat:${statusBarCompatVersion}", {
+        exclude group: 'androidx.appcompat:appcompat'
+        exclude group: 'com.google.android.material:material'
+    })
 }

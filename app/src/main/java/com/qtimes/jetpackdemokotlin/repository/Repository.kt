@@ -20,6 +20,28 @@ import com.qtimes.jetpackdemokotlin.room.AppDatabase
 import kotlinx.coroutines.flow.Flow
 
 /**
+ * 设备相关Repository
+ */
+class DeviceRepository(iUIActionEvent: IUIActionEvent) :
+    BaseRepository(iUIActionEvent) {
+
+    fun authenticateDevice(
+        authenticateBody: AuthenticateBody,
+        callbackFun: (RequestCallback<AuthenticateRsp>.() -> Unit)?
+    ) {
+        mainRemoteDataSource.enqueueLoading(
+            { authenticateDev(authenticateBody) },
+            callbackFun = callbackFun
+        )
+    }
+
+    fun getDoors(deviceName: String, callbackFun: (RequestCallback<MutableList<DoorInfo>>.() -> Unit)?) {
+        mainRemoteDataSource.enqueue({ getDoorList(deviceName) }, callbackFun = callbackFun)
+    }
+}
+
+
+/**
  * 天气相关Repository
  */
 class WeatherRepository(iUIActionEvent: IUIActionEvent) : BaseRepository(iUIActionEvent) {
@@ -42,22 +64,6 @@ class WeatherRepository(iUIActionEvent: IUIActionEvent) : BaseRepository(iUIActi
     }
 }
 
-/**
- * 设备相关Repository
- */
-class DeviceRepository(iUIActionEvent: IUIActionEvent) :
-    BaseRepository(iUIActionEvent) {
-
-    fun authenticateDevice(
-        authenticateBody: AuthenticateBody,
-        callbackFun: (RequestCallback<AuthenticateRsp>.() -> Unit)?
-    ) {
-        mainRemoteDataSource.enqueueLoading(
-            { authenticateDev(authenticateBody) },
-            callbackFun = callbackFun
-        )
-    }
-}
 
 /**
  * 文章相关Repository

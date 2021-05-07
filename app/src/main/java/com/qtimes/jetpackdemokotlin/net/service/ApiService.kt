@@ -25,7 +25,7 @@ interface ApiService {
      * 获取门类型列表
      */
     @GET("device/doorList")
-    suspend fun getDoorList(@Query("did") deviceId: String): HttpResponse<List<DoorInfo>>
+    suspend fun getDoorList(@Query("did") deviceName: String): HttpResponse<MutableList<DoorInfo>>
 
 
     /**

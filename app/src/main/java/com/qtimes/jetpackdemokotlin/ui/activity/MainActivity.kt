@@ -7,13 +7,13 @@
 
 package com.qtimes.jetpackdemokotlin.ui.activity
 
+import android.graphics.Color
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.KeyEvent
+import android.view.View
+import android.view.Window
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.mikepenz.materialdrawer.model.DividerDrawerItem
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
@@ -29,6 +29,7 @@ import com.qtimes.jetpackdemokotlin.databinding.ActivityMainBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseActivity
 import com.qtimes.jetpackdemokotlin.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import qiu.niorgai.StatusBarCompat
 
 
 class MainActivity : BaseActivity() {

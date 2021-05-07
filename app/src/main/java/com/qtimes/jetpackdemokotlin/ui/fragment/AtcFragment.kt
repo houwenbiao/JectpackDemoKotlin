@@ -15,6 +15,7 @@ import com.qtimes.jetpackdemokotlin.databinding.FragmentAtcBinding
 import com.qtimes.jetpackdemokotlin.model.AtcState
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.viewmodel.DeviceViewModel
+import kotlinx.android.synthetic.main.back_layout.*
 import kotlinx.android.synthetic.main.fragment_atc.*
 
 
@@ -29,13 +30,17 @@ class AtcFragment : BaseFragment() {
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         deviceViewModel.atcDevice()
-
         txt_atc_again.setOnClickListener {
             deviceViewModel.atcDevice()
         }
-
+        txt_back.setOnClickListener {
+            mNavController.navigateUp()
+        }
+        btn_go_activate.setOnClickListener {
+            val action = AtcFragmentDirections.actionAtcFragmentToDoorListFragment()
+            mNavController.navigate(action)
+        }
         deviceViewModel.atcState.observe(mLifecycleOwner) {
             when (it) {
                 AtcState.AUTHENTICATED -> {

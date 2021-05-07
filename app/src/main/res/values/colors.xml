@@ -5,9 +5,11 @@
     <color name="txt_welcome_title">#A1000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="theme_color">#04BD8F</color><!--主体颜色-->
+
     <color name="authenticate_btn_text">#0099FF</color>
     <color name="ticket_button_bg_normal">#04BD8F</color>
-    <color name="ticket_button_bg_focused">#50BD8F</color>
+    <color name="ticket_button_bg_focused">#90BD8F</color>
     <color name="ticket_button_text">#FFFFFF</color>
 
     <color name="btn_unclickable">#c9c9c9</color>
@@ -18,4 +20,7 @@
     <color name="txt_state_authenticated">#04BD8F</color>
     <color name="txt_state_authenticating">#A1000000</color>
     <color name="txt_state_unauthenticated">#FF0000</color>
+
+
+    <color name="ticket_bg">#F2F2F2</color>
 </resources>

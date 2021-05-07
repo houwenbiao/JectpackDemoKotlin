@@ -21,11 +21,10 @@ import com.qtimes.jetpackdemokotlin.viewmodel.base.BaseViewModel
 
 class DeviceViewModel : BaseViewModel() {
 
-    val deviceRepository = DeviceRepository(this)
+    private val deviceRepository = DeviceRepository(this)
 
-    var atcState = MutableLiveData(AtcState.UNAUTHENTICATED)
-
-    var txtAtcStatusColor = MutableLiveData(Color.RED)
+    var atcState = MutableLiveData(AtcState.UNAUTHENTICATED)//认证状态
+    var txtAtcStatusColor = MutableLiveData(Color.RED)//根据认证状态变化的颜色
 
     /**
      * 设备认证

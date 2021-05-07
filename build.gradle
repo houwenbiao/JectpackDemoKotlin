@@ -28,6 +28,8 @@ buildscript {
         materialDrawerVersion = "8.4.0"
         fileDownloaderVersion = "1.7.7"
         datastoreVersion = "1.0.0-alpha07"
+        smartRefreshVersion = "2.0.3"
+        statusBarCompatVersion = "2.3.3"
     }
     repositories {
         google()
@@ -45,6 +47,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url "https://jitpack.io" }
     }
 }
 

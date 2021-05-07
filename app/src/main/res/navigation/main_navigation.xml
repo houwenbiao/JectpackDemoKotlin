@@ -28,5 +28,21 @@
     <fragment
         android:id="@+id/atcFragment"
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.AtcFragment"
-        android:label="AtcFragment" />
+        android:label="AtcFragment">
+        <argument
+            android:name="deviceId"
+            android:defaultValue=""
+            app:argType="string" />
+        <action
+            android:id="@+id/action_atcFragment_to_doorListFragment"
+            app:destination="@id/doorListFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/doorListFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.DoorListFragment"
+        android:label="DoorListFragment" />
 </navigation>
