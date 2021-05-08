@@ -18,7 +18,6 @@ import com.qtimes.jetpackdemokotlin.databinding.FragmentDoorListBinding
 import com.qtimes.jetpackdemokotlin.model.DoorInfo
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.viewmodel.DoorListViewModel
-import kotlinx.android.synthetic.main.back_layout.*
 import kotlinx.android.synthetic.main.fragment_door_list.*
 
 
@@ -44,7 +43,7 @@ class DoorListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         doorListVM.getDoors()
-        txt_back.setOnClickListener {
+        door_list_title.onBackClickListener{
             mNavController.navigateUp()
         }
         door_list_srl.setOnRefreshListener { reFreshLayout ->

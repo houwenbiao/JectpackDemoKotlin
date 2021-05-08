@@ -14,16 +14,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include
-            android:id="@+id/door_list_back"
-            layout="@layout/back_layout" />
+        <com.qtimes.jetpackdemokotlin.ui.views.BackTitleBar
+            android:id="@+id/door_list_title"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y80"
+            app:title="@string/title_door_list"
+            app:titleTextSize="@dimen/x18"
+            custom:ignore="MissingConstraints" />
 
         <com.scwang.smart.refresh.layout.SmartRefreshLayout
-            android:layout_marginTop="@dimen/y80"
             android:id="@+id/door_list_srl"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintTop_toBottomOf="@id/door_list_back">
+            android:layout_marginTop="@dimen/y80"
+            app:layout_constraintTop_toBottomOf="@id/door_list_title">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

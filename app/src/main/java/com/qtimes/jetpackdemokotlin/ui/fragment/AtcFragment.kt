@@ -34,7 +34,7 @@ class AtcFragment : BaseFragment() {
         txt_atc_again.setOnClickListener {
             deviceViewModel.atcDevice()
         }
-        txt_back.setOnClickListener {
+        atc_title.onBackClickListener {
             mNavController.navigateUp()
         }
         btn_go_activate.setOnClickListener {

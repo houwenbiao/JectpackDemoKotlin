@@ -20,7 +20,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/back_layout" />
+        <com.qtimes.jetpackdemokotlin.ui.views.BackTitleBar
+            android:id="@+id/atc_title"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y80"
+            app:title="@string/title_atc"
+            app:titleTextSize="@dimen/x18"
+            tools:ignore="MissingConstraints" />
 
         <TextView
             android:id="@+id/txt_atc_status"
