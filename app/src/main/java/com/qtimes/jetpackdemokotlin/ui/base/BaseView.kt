@@ -65,7 +65,7 @@ abstract class BaseFragment : Fragment(), IUIActionEventObserver {
     abstract fun getLayoutId(): Int
 
     //ViewDataBinding set model
-    protected abstract fun bindingSetViewModels()
+    open fun bindingSetViewModels() {}
 
 
     override fun showLoading(job: Job?) {

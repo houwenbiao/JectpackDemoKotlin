@@ -23,7 +23,7 @@ class DoorListViewModel : BaseViewModel() {
     /**
      * 获取门列表
      */
-    fun getDoors() {
+    fun getDoorList() {
         deviceRepository.getDoors(ESAMUtil.getDeviceName()) {
             onSuccess { doorList ->
                 doors.postValue(doorList)

@@ -29,10 +29,6 @@
         android:id="@+id/atcFragment"
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.AtcFragment"
         android:label="AtcFragment">
-        <argument
-            android:name="deviceId"
-            android:defaultValue=""
-            app:argType="string" />
         <action
             android:id="@+id/action_atcFragment_to_doorListFragment"
             app:destination="@id/doorListFragment"
@@ -44,5 +40,40 @@
     <fragment
         android:id="@+id/doorListFragment"
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.DoorListFragment"
-        android:label="DoorListFragment" />
+        android:label="DoorListFragment">
+
+        <action
+            android:id="@+id/action_doorListFragment_to_cameraTypeFragment"
+            app:destination="@id/cameraTypeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/cameraTypeFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.CameraTypeFragment"
+        android:label="CameraTypeFragment">
+        <argument
+            android:name="doorType"
+            app:argType="com.qtimes.jetpackdemokotlin.model.DoorInfo" />
+        <action
+            android:id="@+id/action_cameraTypeFragment_to_atcInfoConfirmFragment"
+            app:destination="@id/atcInfoConfirmFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/atcInfoConfirmFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.AtcInfoConfirmFragment"
+        android:label="AtcInfoConfirmFragment">
+        <argument
+            android:name="doorType"
+            app:argType="com.qtimes.jetpackdemokotlin.model.DoorInfo" />
+        <argument
+            android:name="cameraInfo"
+            app:argType="com.qtimes.jetpackdemokotlin.model.CameraAngle" />
+    </fragment>
 </navigation>

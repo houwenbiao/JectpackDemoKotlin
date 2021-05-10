@@ -33,10 +33,23 @@
     <!--标题-->
     <string name="txt_back">返回</string>
     <string name="next_step">下一步</string>
+    <string name="txt_confirm">确认</string>
 
     <string name="title_atc">设备认证</string>
-    <string name="title_door_list">选择门类型</string>
+    <string name="title_door_list">门类型</string>
+    <string name="title_camera_type">摄像头类型</string>
+    <string name="title_atc_info">设备激活信息</string>
+
+    <string name="activate_version">激活版本</string>
+    <string name="model_version_info">激活版本信息</string>
 
     <!--door-->
     <string name="chose_door_type">请选择门类型</string>
+
+    <!--camera-->
+    <string name="camera_type_90">90°摄像头</string>
+    <string name="camera_type_0">0°摄像头</string>
+    <string name="chose_camera_type">请选择摄像头类型</string>
+
+
 </resources>

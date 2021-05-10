@@ -34,7 +34,7 @@ class BackTitleBar @JvmOverloads constructor(
             )
         )
         txt_back_title.textSize =
-            typedArray.getDimension(R.styleable.BackTitleBar_titleTextSize, 18f)
+            typedArray.getDimension(R.styleable.BackTitleBar_titleTextSize, 14f)
         typedArray.recycle()
     }
 

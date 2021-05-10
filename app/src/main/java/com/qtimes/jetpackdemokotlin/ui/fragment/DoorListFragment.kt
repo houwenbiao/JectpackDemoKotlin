@@ -2,7 +2,7 @@
  * Created with JackHou
  * Date: 2021/5/7
  * Time: 13:38
- * Description:
+ * Description:门列表界面
  */
 
 package com.qtimes.jetpackdemokotlin.ui.fragment
@@ -17,6 +17,7 @@ import com.qtimes.jetpackdemokotlin.common.Const
 import com.qtimes.jetpackdemokotlin.databinding.FragmentDoorListBinding
 import com.qtimes.jetpackdemokotlin.model.DoorInfo
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
+import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.DoorListViewModel
 import kotlinx.android.synthetic.main.fragment_door_list.*
 
@@ -24,17 +25,7 @@ import kotlinx.android.synthetic.main.fragment_door_list.*
 @SuppressLint("UseCompatLoadingForDrawables")
 class DoorListFragment : BaseFragment() {
 
-    private val doorListVM: DoorListViewModel by getViewModel(DoorListViewModel::class.java) {
-        doors.observe(mLifecycleOwner) { doorList ->
-            if (doorList.size > 0) {
-                btn_door_type_next_step.background =
-                    mContext!!.getDrawable(R.drawable.ticket_button_selector)
-                updateDoorTypeUI(doorList)
-            } else {
-                btn_door_type_next_step.setBackgroundColor(mContext!!.getColor(R.color.btn_unclickable))
-            }
-        }
-    }
+    private val doorListVM: DoorListViewModel by getViewModel(DoorListViewModel::class.java)
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_door_list
@@ -42,13 +33,30 @@ class DoorListFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        doorListVM.getDoors()
-        door_list_title.onBackClickListener{
+        doorListVM.getDoorList()
+        door_list_title.onBackClickListener {
             mNavController.navigateUp()
         }
         door_list_srl.setOnRefreshListener { reFreshLayout ->
             reFreshLayout.finishRefresh(Const.LOADING_TIMEOUT)
-            doorListVM.getDoors()
+            doorListVM.getDoorList()
+        }
+
+        btn_door_type_next_step.setOnClickListener {
+            val action = DoorListFragmentDirections
+                .actionDoorListFragmentToCameraTypeFragment(doorListVM.checkDoor.value!!)
+            mNavController.navigate(action)
+        }
+
+        LogUtil.d("onViewCreated")
+        doorListVM.doors.observe(mLifecycleOwner) { doorList ->
+            if (doorList.size > 0) {
+                btn_door_type_next_step.background =
+                    mContext!!.getDrawable(R.drawable.ticket_button_selector)
+                updateDoorTypeUI(doorList)
+            } else {
+                btn_door_type_next_step.setBackgroundColor(mContext!!.getColor(R.color.btn_unclickable))
+            }
         }
     }
 

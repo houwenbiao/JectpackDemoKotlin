@@ -10,7 +10,7 @@ package com.qtimes.jetpackdemokotlin.model
 import java.io.Serializable
 
 /*门的信息*/
-class DoorInfo(val typeId: Int, val name: String, val type: String)
+class DoorInfo(val typeId: Int, val name: String, val type: String) : Serializable
 
 /*模型信息*/
 class ModelInfo(

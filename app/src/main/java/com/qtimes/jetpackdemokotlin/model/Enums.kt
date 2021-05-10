@@ -14,3 +14,8 @@ enum class AtcState(val code: Int, val desc: String) {
     AUTHENTICATED(3, "设备已认证"), //已认证
     AUTHENTICATE_FAILED(4, "设备认证失败");//设备认证失败
 }
+
+enum class CameraAngle(val angle: Int, val desc: String) {
+    ZERO(0, "0°摄像头"),
+    NINETY(90, "90°摄像头")
+}
