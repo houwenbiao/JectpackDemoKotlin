@@ -35,6 +35,9 @@ class HttpConfig {
         //域名校验
         const val HOST_REGEX = "*.qtimes.cc"
 
+        //Janus
+        const val JANUS_URL = "ws://192.168.31.11:8188/ws"
+
     }
 
     /**

@@ -6,7 +6,7 @@
         android:title="@string/dev" />
 
     <item
-        android:id="@+id/newsFragment"
+        android:id="@+id/janusFragment"
         android:icon="@drawable/ic_market"
         android:title="@string/txt_news" />
 

@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/y80"
             app:title="@string/title_camera_type"
-            app:titleTextSize="@dimen/x18"
+            app:titleTextSize="@dimen/x10"
             tools:ignore="MissingConstraints" />
 
         <TextView
