@@ -51,6 +51,7 @@ class WebSocketChannel {
      */
     fun sendMessage(msg: String) {
         if (connected) {
+            LogUtil.d("WS send msg: $msg")
             webSocket.send(msg)
         } else {
             LogUtil.e("Send message failed socket not connected")
@@ -70,25 +71,25 @@ class WebSocketChannel {
     }
 
     private inner class WebSocketHandler : WebSocketListener() {
+
         override fun onOpen(webSocket: WebSocket, response: Response) {
+            LogUtil.d("onOpen")
             connected = true
-            LogUtil.d(TAG + "onOpen")
             webSocketCallback.onOpen()
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            LogUtil.d(TAG + "onMessage $text")
             webSocketCallback.onMessage(text)
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            LogUtil.d(TAG + "onClosed $reason")
+            LogUtil.d("onClosed $reason")
             connected = false
             webSocketCallback.onClosed()
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            LogUtil.d(TAG + "onFailure " + t.message)
+            LogUtil.d("onFailure response: $response")
             connected = false
             webSocketCallback.onClosed()
         }

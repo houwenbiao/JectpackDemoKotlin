@@ -28,7 +28,9 @@ enum class JanusMessageType {
     DESTROY,
     KEEPALIVE,//心跳消息
     CREATE,
+    JOINED,
     ATTACH,
+    ATTACHED,
     EVENT,//插件发布的事件消息
     ERROR,
     ACK,//确认消息, 也就是说之前客户端发送了一个信令给服务端，服务端收到之后给客户端回了一个ack，确认服务端已经收到该消息了
@@ -38,15 +40,17 @@ enum class JanusMessageType {
     DETACH,//某个插件要求与Janus Core之间断开连接
     DETACHED,
     SLOWLINK,//限流
-    MEDIA;//开始或停止媒体流
+    MEDIA,//开始或停止媒体流
+    TIMEOUT;
 
     override fun toString(): String {
         return name
     }
 
     companion object {
+        @ExperimentalStdlibApi
         fun fromString(string: String): JanusMessageType {
-            return valueOf(string)
+            return valueOf(string.uppercase())
         }
     }
 }

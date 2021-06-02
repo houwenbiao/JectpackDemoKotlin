@@ -16,22 +16,28 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.Const
-import com.qtimes.jetpackdemokotlin.janus.CreatePeerConnectionCallback
-import com.qtimes.jetpackdemokotlin.janus.JanusCallback
-import com.qtimes.jetpackdemokotlin.janus.JanusClient
+import com.qtimes.jetpackdemokotlin.janus.*
+import com.qtimes.jetpackdemokotlin.model.JanusMessageType
 import com.qtimes.jetpackdemokotlin.model.JanusRoom
+import com.qtimes.jetpackdemokotlin.model.Publisher
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
-import kotlinx.android.synthetic.main.fragment_github_repository.*
+import kotlinx.android.synthetic.main.fragment_videoroom.*
+import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
 import java.math.BigInteger
-import java.util.*
-import kotlin.random.Random
 
 class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCallback {
+
+    companion object {
+        const val TAG: String = "VideoRoomFragment"
+    }
+
+
     val videoRoomViewModel: VideoRoomViewModel by getViewModel(VideoRoomViewModel::class.java)
     private lateinit var peerConnectionFactory: PeerConnectionFactory
     private var peerConnection: PeerConnection? = null
@@ -43,17 +49,17 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     var eglBaseContext: EglBase.Context? = null
     private lateinit var janusClient: JanusClient
     var videoRoomHandlerId: BigInteger = BigInteger("0")
-    private var isFrontCamera: Boolean = true
+    private var isFrontCamera: Boolean = false
 
-    var room: JanusRoom = JanusRoom(Random(1234567890).nextInt()) // 默认房间
+    var room: JanusRoom = JanusRoom(1234) // 默认房间
 
-    private var videoItemList: List<VideoItem> = ArrayList()
+    private var videoItemList: MutableList<VideoItem> = arrayListOf()
     private var adapter: VideoItemAdapter? = null
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recycler_view.layoutManager = GridLayoutManager(mContext, 2)
+        rv_vm.layoutManager = GridLayoutManager(mContext, 2)
         videoCapturer = createVideoCapturer(isFrontCamera)
         if (videoCapturer == null) {
             return
@@ -82,7 +88,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         peerConnection?.addTrack(audioTrack)
         peerConnection?.addTrack(videoTrack)
         adapter = VideoItemAdapter()
-        recycler_view.adapter = adapter
+        rv_vm.adapter = adapter
     }
 
     override fun getLayoutId(): Int {
@@ -93,11 +99,11 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         super.onDestroy()
         videoCapturer?.dispose()
         surfaceTextureHelper?.dispose()
-        janusClient.disconnect()
+        janusClient?.disconnect()
         videoItemList.stream().forEach {
-            it.peerConnection.close()
-            it.videoTrack.dispose()
-            it.surfaceViewRenderer.release()
+            it.peerConnection?.close()
+            it.videoTrack?.dispose()
+            it.surfaceViewRenderer?.release()
         }
     }
 
@@ -161,9 +167,14 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         val encoderFactory: VideoEncoderFactory =
             DefaultVideoEncoderFactory(eglBaseContext, false, true)
         val decoderFactory: VideoDecoderFactory = DefaultVideoDecoderFactory(eglBaseContext)
+        PeerConnectionFactory.initialize(
+            PeerConnectionFactory.InitializationOptions.builder(mContext)
+                .setEnableInternalTracer(true)
+                .createInitializationOptions()
+        )
+
         val builder = PeerConnectionFactory.builder().setVideoDecoderFactory(decoderFactory)
             .setVideoEncoderFactory(encoderFactory).setOptions(null)
-
         return builder.createPeerConnectionFactory()
     }
 
@@ -203,21 +214,21 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     }
 
 
-    inner class VideoItem(
-        var peerConnection: PeerConnection,
-        var userId: BigInteger,
-        var display: String,
-        var videoTrack: VideoTrack,
-        var surfaceViewRenderer: SurfaceViewRenderer
-    )
+    inner class VideoItem(var userId: BigInteger?, var display: String?) {
+        var peerConnection: PeerConnection? = null
+        var videoTrack: VideoTrack? = null
+        var surfaceViewRenderer: SurfaceViewRenderer? = null
+    }
 
-    inner class VideoItemHolder(private val itemView: View) : RecyclerView.ViewHolder(itemView) {
-
+    inner class VideoItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var surfaceViewRenderer: SurfaceViewRenderer =
             itemView.findViewById(R.id.surface_view_render)
         var tvUserId: TextView = itemView.findViewById(R.id.tv_userid)
         var tvMute: TextView = itemView.findViewById(R.id.tv_mute)
         var tvSwitchCamera: TextView = itemView.findViewById(R.id.tv_switch_camera)
+        init {
+            surfaceViewRenderer.init(eglBaseContext, null)
+        }
     }
 
     inner class VideoItemAdapter : RecyclerView.Adapter<VideoItemHolder>() {
@@ -255,7 +266,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
         override fun onBindViewHolder(holder: VideoItemHolder, position: Int) {
             val videoItem: VideoItem = videoItemList[position]
-            videoItem.videoTrack.addSink(holder.surfaceViewRenderer)
+            videoItem.videoTrack?.addSink(holder.surfaceViewRenderer)
             videoItem.surfaceViewRenderer = holder.surfaceViewRenderer
             holder.tvUserId.text = videoItem.display
             if (videoRoomViewModel.userName.value == videoItem.display) {
@@ -272,64 +283,344 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         }
     }
 
+    private fun createOffer(peerConnection: PeerConnection, callback: CreateOfferCallback?) {
+        val mediaConstraints = MediaConstraints()
+        //                mediaConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
+//                mediaConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+//                mediaConstraints.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
+        peerConnection.createOffer(object : SdpObserver {
+            override fun onCreateSuccess(sdp: SessionDescription) {
+
+                peerConnection.setLocalDescription(object : SdpObserver {
+                    override fun onCreateSuccess(sdp: SessionDescription) {
+
+                    }
+
+                    override fun onSetSuccess() {
+
+                    }
+
+                    override fun onCreateFailure(error: String) {
+
+                    }
+
+                    override fun onSetFailure(error: String) {
+
+                    }
+                }, sdp)
+
+//
+                callback?.onCreateOfferSuccess(sdp)
+            }
+
+            override fun onSetSuccess() {
+                LogUtil.i("$TAG createOffer onSetSuccess")
+            }
+
+            override fun onCreateFailure(error: String) {
+                LogUtil.i("$TAG createOffer onCreateFailure, $error")
+                callback?.onCreateFailed(error)
+            }
+
+            override fun onSetFailure(error: String) {
+                LogUtil.i("$TAG createOffer onSetFailure, $error")
+                callback?.onCreateFailed(error)
+            }
+        }, mediaConstraints)
+    }
+
+
+    private fun createAnswer(peerConnection: PeerConnection, callback: CreateAnswerCallback?) {
+        val mediaConstraints = MediaConstraints()
+        peerConnection.createAnswer(object : SdpObserver {
+            override fun onCreateSuccess(sdp: SessionDescription) {
+                peerConnection.setLocalDescription(object : SdpObserver {
+                    override fun onCreateSuccess(sdp: SessionDescription) {}
+                    override fun onSetSuccess() {
+                        // send answer sdp
+                        LogUtil.i("$TAG createAnswer onSetSuccess")
+                        callback?.onSetAnswerSuccess(sdp)
+                    }
+
+                    override fun onCreateFailure(s: String) {
+                        LogUtil.i("$TAG createAnswer onCreateFailure, $s")
+                        callback?.onSetAnswerFailed(s)
+                    }
+
+                    override fun onSetFailure(s: String) {
+                        LogUtil.i("$TAG createAnswer onSetFailure, $s")
+                        callback?.onSetAnswerFailed(s)
+                    }
+                }, sdp)
+            }
+
+            override fun onSetSuccess() {
+                LogUtil.i("$TAG createAnswer onSetSuccess")
+            }
+
+            override fun onCreateFailure(s: String) {
+                LogUtil.i("$TAG createAnswer onCreateFailure, $s")
+            }
+
+            override fun onSetFailure(s: String) {
+                LogUtil.i("$TAG createAnswer onSetFailure, $s")
+            }
+        }, mediaConstraints)
+    }
+
+    private fun handleNewPublishers(publishers: JSONArray) {
+        for (i in 0 until publishers.length()) {
+            try {
+                val publishObj = publishers.getJSONObject(i)
+                val feedId = BigInteger(publishObj.getString("id"))
+                val display = publishObj.getString("display")
+                // attach 到发布者的 handle 上
+                janusClient.subscribeAttach(feedId)
+                room.addPublisher(Publisher(feedId, display))
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun addNewVideoItem(userId: BigInteger?, display: String?): VideoItem {
+        val videoItem = VideoItem(userId, display)
+        videoItemList.add(videoItem)
+        return videoItem
+    }
+
+
+    /***************JanusCallback**************/
     override fun onCreateSession(sessionId: BigInteger?) {
-        TODO("Not yet implemented")
+        LogUtil.i("onCreateSession: $sessionId")
+        janusClient.attachPlugin("janus.plugin.videoroom")
     }
 
-    override fun onAttached(handleId: BigInteger?) {
-        TODO("Not yet implemented")
+    override fun onJanusAttached(handleId: BigInteger) {
+        videoRoomHandlerId = handleId
+        LogUtil.d("onJanusAttached: ${Thread.currentThread().name}")
+        launchMain {
+            janusClient.joinRoom(handleId, room.id, videoRoomViewModel.userName.value)
+        }
     }
 
-    override fun onSubscribeAttached(subscribeHandleId: BigInteger?, feedId: BigInteger?) {
-        TODO("Not yet implemented")
+    override fun onSubscribeAttached(subscribeHandleId: BigInteger, feedId: BigInteger) {
+        val publisher: Publisher = room.findPublisherById(feedId)
+        publisher.handleId = subscribeHandleId
+        janusClient.subscribe(subscribeHandleId, room.id, feedId)
     }
 
     override fun onDetached(handleId: BigInteger?) {
-        TODO("Not yet implemented")
+        videoRoomHandlerId = BigInteger("0")
     }
 
     override fun onHangup(handleId: BigInteger?) {
-        TODO("Not yet implemented")
+
     }
 
+    @ExperimentalStdlibApi
     override fun onMessage(
-        sender: BigInteger?,
-        handleId: BigInteger?,
+        sender: BigInteger,
+        handleId: BigInteger,
         msg: JSONObject?,
         jsep: JSONObject?
     ) {
-        TODO("Not yet implemented")
+        if (msg == null) {
+            return
+        }
+        if (!msg.has("videoroom")) {
+            return
+        }
+        LogUtil.i("onMessage: $msg")
+        val type: JanusMessageType = JanusMessageType.fromString(msg.getString("videoroom"))
+        when (type) {
+            JanusMessageType.JOINED -> {
+                createOffer(peerConnection!!, object : CreateOfferCallback {
+                    override fun onCreateOfferSuccess(sdp: SessionDescription) {
+                        // 发布
+                        janusClient.publish(videoRoomHandlerId, sdp)
+                    }
+
+                    override fun onCreateFailed(error: String) {
+                        LogUtil.e("CreateOfferCallback onCreateFailed")
+                    }
+
+                })
+                val publishers = msg.getJSONArray("publishers")
+                handleNewPublishers(publishers)
+            }
+
+            JanusMessageType.EVENT -> {
+                if (msg.has("configured") && msg.getString("configured") == "ok" && jsep != null) {
+                    // sdp 协商成功，收到网关发来的 sdp answer
+                    val sdp = jsep.getString("sdp")
+                    peerConnection!!.setRemoteDescription(object : SdpObserver {
+                        override fun onCreateSuccess(sdp: SessionDescription) {
+                        }
+
+                        override fun onSetSuccess() {
+                            launchMain {
+                                LogUtil.d("videoCapturer: $videoCapturer")
+                                videoCapturer!!.startCapture(960, 540, 30)
+                                val videoItem: VideoItem =
+                                    addNewVideoItem(null, videoRoomViewModel.userName.value)
+                                videoItem.peerConnection = peerConnection!!
+                                videoItem.videoTrack = videoTrack!!
+                                LogUtil.d("videoItem: ${videoItem.videoTrack}, videoTrack: $videoTrack")
+                                adapter!!.notifyItemInserted(videoItemList.size - 1)
+                            }
+                        }
+
+                        override fun onCreateFailure(error: String) {
+                        }
+
+                        override fun onSetFailure(error: String) {
+                        }
+                    }, SessionDescription(SessionDescription.Type.ANSWER, sdp))
+                } else if (msg.has("unpublished")) {
+                    val unPublishdUserId = msg.getLong("unpublished")
+                } else if (msg.has("leaving")) {
+                    // 离开
+                    val leavingUserId = BigInteger(msg.getString("leaving"))
+                    room.removePublisherById(leavingUserId)
+                    launchMain {
+                        val it: MutableIterator<VideoItem> = videoItemList.iterator()
+                        var index = 0
+                        while (it.hasNext()) {
+                            val next = it.next()
+                            if (leavingUserId == next.userId) {
+                                it.remove()
+                                adapter!!.notifyItemRemoved(index)
+                            }
+                            index++
+                        }
+
+                    }
+                } else if (msg.has("publishers")) {
+                    // 新用户开始发布
+                    val publishers = msg.getJSONArray("publishers")
+                    handleNewPublishers(publishers)
+                } else if (msg.has("started") && msg.getString("started") == "ok") {
+                    // 订阅 start 成功
+                    LogUtil.i("订阅 start 成功")
+                }
+            }
+
+            JanusMessageType.ATTACHED -> {
+                if (jsep == null) {
+                    return
+                }
+                // attach 到了一个Publisher 上,会收到网关转发来的sdp offer
+                val sdp = jsep.getString("sdp")
+                val feedId = BigInteger(msg.getString("id"))
+                val display = msg.getString("display")
+                val publisher = room.findPublisherById(feedId)
+
+                // 添加用户到界面
+                val videoItem = addNewVideoItem(feedId, display)
+                launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
+
+                val peerConnection = createPeerConnection(object : CreatePeerConnectionCallback {
+                    override fun onIceGatheringComplete() {
+                        janusClient.trickleCandidateComplete(sender)
+                    }
+
+                    override fun onIceCandidate(candidate: IceCandidate) {
+                        janusClient.trickleCandidate(sender, candidate)
+                    }
+
+                    override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {}
+                    override fun onAddStream(stream: MediaStream) {
+                        if (stream.videoTracks.size > 0) {
+                            launchMain {
+                                videoItem.videoTrack = stream.videoTracks[0]
+                                adapter!!.notifyDataSetChanged()
+                            }
+                        }
+                    }
+
+                    override fun onRemoveStream(stream: MediaStream) {
+
+                    }
+                })
+                videoItem.peerConnection = peerConnection!!
+                peerConnection.setRemoteDescription(object : SdpObserver {
+                    override fun onCreateSuccess(sdp: SessionDescription) {
+
+                    }
+
+                    override fun onSetSuccess() {
+
+                        // 这时应该回复网关一个 start ，附带自己的 sdp answer
+                        createAnswer(peerConnection, object : CreateAnswerCallback {
+                            override fun onSetAnswerSuccess(sdp: SessionDescription) {
+                                janusClient.subscriptionStart(
+                                    publisher.handleId,
+                                    room.id,
+                                    sdp
+                                )
+                            }
+
+                            override fun onSetAnswerFailed(error: String) {
+
+                            }
+                        })
+                    }
+
+                    override fun onCreateFailure(error: String) {
+
+                    }
+
+                    override fun onSetFailure(error: String) {
+
+                    }
+                }, SessionDescription(SessionDescription.Type.OFFER, sdp))
+            }
+
+            else -> {
+                LogUtil.d(msg)
+            }
+        }
     }
 
     override fun onIceCandidate(handleId: BigInteger?, candidate: JSONObject?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onDestroySession(sessionId: BigInteger?) {
-        TODO("Not yet implemented")
+        sessionId?.let {
+            LogUtil.i("onDestroySession(id =  $sessionId)")
+
+        }
     }
 
     override fun onError(error: String?) {
-        TODO("Not yet implemented")
+        error?.let {
+            LogUtil.e(it)
+        }
     }
+    /***************JanusCallback**************/
 
+
+    /***********CreatePeerConnectionCallback**********/
     override fun onIceGatheringComplete() {
-        TODO("Not yet implemented")
+        janusClient.trickleCandidateComplete(videoRoomHandlerId)
     }
 
     override fun onIceCandidate(candidate: IceCandidate) {
-        TODO("Not yet implemented")
+        janusClient.trickleCandidate(videoRoomHandlerId, candidate)
     }
 
     override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {
-        TODO("Not yet implemented")
+        peerConnection?.removeIceCandidates(candidates)
     }
 
     override fun onAddStream(stream: MediaStream) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onRemoveStream(stream: MediaStream) {
-        TODO("Not yet implemented")
+
     }
+    /***********CreatePeerConnectionCallback**********/
 }

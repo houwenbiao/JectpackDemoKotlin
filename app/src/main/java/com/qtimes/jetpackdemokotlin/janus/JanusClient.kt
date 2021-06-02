@@ -74,14 +74,17 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
     /**
      * 创建session
      */
-    fun createSession() {
+    private fun createSession() {
         val tid = randomString(12)
+        LogUtil.d("createSession tid = $tid, transactions = $transactions")
         transactions[tid] = object : Transaction(tid) {
             @Throws(Exception::class)
             override fun onSuccess(data: JSONObject) {
+                LogUtil.d("createSession onSuccess = $data")
                 val param = data.getJSONObject("data")
                 sessionId = BigInteger(param.getString("id"))
                 startKeepAliveTimer()
+                LogUtil.d("createSession: callback = $janusCallback")
                 janusCallback?.onCreateSession(sessionId)
             }
         }
@@ -126,7 +129,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                 val param = data.getJSONObject("data")
                 val handleId = BigInteger(param.getString("id"))
                 if (janusCallback != null) {
-                    janusCallback!!.onAttached(handleId)
+                    janusCallback!!.onJanusAttached(handleId)
                 }
                 val handle = PluginHandle(handleId)
                 attachedPlugins[handleId] = handle
@@ -335,19 +338,21 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
      * 连接打开
      */
     override fun onOpen() {
+        LogUtil.d("janus client onOpen")
         createSession()
     }
 
     /**
      * 接收到消息
      */
+    @ExperimentalStdlibApi
     override fun onMessage(message: String) {
         LogUtil.d("Received message >>>>>>>>>> $message")
         try {
             val obj = JSONObject(message)
             val type: JanusMessageType = JanusMessageType.fromString(obj.getString("janus"))
             var transaction: String? = null
-            var sender: BigInteger? = null
+            var sender: BigInteger = BigInteger("0")
             if (obj.has("transaction")) {
                 transaction = obj.getString("transaction")
             }
@@ -358,6 +363,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             if (sender != null) {
                 handle = attachedPlugins[sender]
             }
+            LogUtil.d("Received message type=$type transaction = $transaction, sender = $sender")
             when (type) {
                 JanusMessageType.KEEPALIVE -> {
                 }
@@ -365,9 +371,15 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                 }
                 JanusMessageType.SUCCESS -> if (transaction != null) {
                     val cb = transactions[transaction]
+                    LogUtil.d("Received message SUCCESS transaction = $transaction")
                     if (cb != null) {
                         try {
-                            cb.onSuccess(obj, cb.feedId)
+                            LogUtil.d("Received message cb = ${cb.feedId}, ${cb.tid}")
+                            if (cb.feedId != null) {
+                                cb.onSuccess(obj, cb.feedId!!)
+                            } else {
+                                cb.onSuccess(obj)
+                            }
                             transactions.remove(transaction)
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -393,29 +405,28 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                     }
                 }
                 JanusMessageType.EVENT -> {
-                    run {
-                        if (handle != null) {
-                            var plugin_data: JSONObject? = null
-                            if (obj.has("plugindata")) {
-                                plugin_data = obj.getJSONObject("plugindata")
+                    if (handle != null) {
+                        var pluginData
+                        : JSONObject? = null
+                        if (obj.has("plugindata")) {
+                            pluginData = obj.getJSONObject("plugindata")
+                        }
+                        if (pluginData != null) {
+                            var data: JSONObject? = null
+                            var jsep: JSONObject? = null
+                            if (pluginData.has("data")) {
+                                data = pluginData.getJSONObject("data")
                             }
-                            if (plugin_data != null) {
-                                var data: JSONObject? = null
-                                var jsep: JSONObject? = null
-                                if (plugin_data.has("data")) {
-                                    data = plugin_data.getJSONObject("data")
-                                }
-                                if (obj.has("jsep")) {
-                                    jsep = obj.getJSONObject("jsep")
-                                }
-                                if (janusCallback != null) {
-                                    janusCallback!!.onMessage(
-                                        sender,
-                                        handle.handleId,
-                                        data,
-                                        jsep
-                                    )
-                                }
+                            if (obj.has("jsep")) {
+                                jsep = obj.getJSONObject("jsep")
+                            }
+                            if (janusCallback != null) {
+                                janusCallback!!.onMessage(
+                                    sender,
+                                    handle.handleId,
+                                    data,
+                                    jsep
+                                )
                             }
                         }
                     }

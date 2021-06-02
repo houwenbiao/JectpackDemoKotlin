@@ -36,7 +36,7 @@ interface JanusCallback {
 
     fun onCreateSession(sessionId: BigInteger?)
 
-    fun onAttached(handleId: BigInteger?)
+    fun onJanusAttached(handleId: BigInteger)
 
     /**
      * 订阅回调
@@ -44,15 +44,15 @@ interface JanusCallback {
      * @param subscribeHandleId 订阅HandlerId
      * @param feedId            订阅 feedId
      */
-    fun onSubscribeAttached(subscribeHandleId: BigInteger?, feedId: BigInteger?)
+    fun onSubscribeAttached(subscribeHandleId: BigInteger, feedId: BigInteger)
 
     fun onDetached(handleId: BigInteger?)
 
     fun onHangup(handleId: BigInteger?)
 
     fun onMessage(
-        sender: BigInteger?,
-        handleId: BigInteger?,
+        sender: BigInteger,
+        handleId: BigInteger,
         msg: JSONObject?,
         jsep: JSONObject?
     )

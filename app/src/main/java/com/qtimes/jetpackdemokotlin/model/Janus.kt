@@ -19,7 +19,7 @@ import java.math.BigInteger
 
 
 class Publisher(val id: BigInteger, val display: String) {
-    private var handleId: BigInteger = BigInteger("0")
+    var handleId: BigInteger = BigInteger("0")
 }
 
 
@@ -64,7 +64,7 @@ class JanusRoom(val id: Int) {
  */
 open class Transaction(val tid: String) {
 
-    var feedId: BigInteger = BigInteger("0")
+    var feedId: BigInteger? = null
 
     constructor(tid: String, feedId: BigInteger) : this(tid) {
         this.feedId = feedId
