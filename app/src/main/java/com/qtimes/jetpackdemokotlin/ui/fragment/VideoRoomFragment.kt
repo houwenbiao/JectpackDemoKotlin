@@ -21,6 +21,7 @@ import com.qtimes.jetpackdemokotlin.model.JanusMessageType
 import com.qtimes.jetpackdemokotlin.model.JanusRoom
 import com.qtimes.jetpackdemokotlin.model.Publisher
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
+import com.qtimes.jetpackdemokotlin.net.HttpConfig.Companion.JANUS_ICE_URL
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
@@ -109,8 +110,9 @@ class VideoRoomFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
     private fun createPeerConnection(callback: CreatePeerConnectionCallback): PeerConnection? {
         val iceServerList: MutableList<PeerConnection.IceServer> = mutableListOf()
-        iceServerList.add(PeerConnection.IceServer("stun:stun.l.google.com:19302"))
-        iceServerList.add(PeerConnection.IceServer("stun:webrtc.encmed.cn:5349"))
+//        iceServerList.add(PeerConnection.IceServer("stun:stun.l.google.com:19302"))
+//        iceServerList.add(PeerConnection.IceServer("stun:webrtc.encmed.cn:5349"))
+        iceServerList.add(PeerConnection.IceServer(JANUS_ICE_URL))
         return peerConnectionFactory.createPeerConnection(
             iceServerList,
             object : PeerConnection.Observer {

@@ -37,7 +37,7 @@ class HttpConfig {
 
         //Janus
         const val JANUS_URL = "ws://192.168.3.2:8188/ws"
-
+        const val JANUS_ICE_URL = "stun:192.168.3.2:3478"
     }
 
     /**
