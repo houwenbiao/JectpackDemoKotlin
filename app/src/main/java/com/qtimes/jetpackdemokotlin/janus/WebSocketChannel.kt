@@ -51,7 +51,7 @@ class WebSocketChannel {
      */
     fun sendMessage(msg: String) {
         if (connected) {
-            LogUtil.d("WS send msg: $msg")
+            LogUtil.d("WS send msg------>: $msg")
             webSocket.send(msg)
         } else {
             LogUtil.e("Send message failed socket not connected")

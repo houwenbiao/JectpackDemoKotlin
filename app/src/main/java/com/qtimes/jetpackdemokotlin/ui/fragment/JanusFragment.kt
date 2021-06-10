@@ -23,6 +23,10 @@ class JanusFragment : BaseFragment() {
         jump_video_room.setOnClickListener {
             mNavController.navigate(JanusFragmentDirections.actionJanusFragmentToVideoRoomFragment())
         }
+
+        jump_video_call.setOnClickListener {
+            mNavController.navigate(JanusFragmentDirections.actionJanusFragmentToVideoCallFragment())
+        }
     }
 
     override fun getLayoutId(): Int {

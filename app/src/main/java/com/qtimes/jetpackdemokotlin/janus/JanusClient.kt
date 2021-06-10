@@ -7,7 +7,7 @@
 
 package com.qtimes.jetpackdemokotlin.janus
 
-import com.qtimes.jetpackdemokotlin.model.JanusMessageType
+import com.qtimes.jetpackdemokotlin.model.JanusMsgType
 import com.qtimes.jetpackdemokotlin.model.PluginHandle
 import com.qtimes.jetpackdemokotlin.model.Transaction
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
@@ -255,6 +255,28 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         webSocketChannel.sendMessage(message.toString())
     }
 
+
+    fun record(handleId: BigInteger?, record: Boolean, name: String?) {
+        val tid: String = randomString(12)
+        try {
+            val obj = JSONObject()
+            val msg = JSONObject()
+            msg.put("request", "set")
+            msg.put("audio", true)
+            msg.put("video", true)
+            msg.put("record", record)
+            msg.put("filename", name)
+            obj.put("janus", "message")
+            obj.put("transaction", tid)
+            obj.put("session_id", sessionId)
+            obj.put("handle_id", handleId)
+            obj.put("body", msg)
+            webSocketChannel.sendMessage(obj.toString())
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+    }
+
     /**
      * 订阅
      *
@@ -314,6 +336,9 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         webSocketChannel.sendMessage(message.toString())
     }
 
+    /**
+     * 加入房间
+     */
     fun joinRoom(handleId: BigInteger?, roomId: Int, displayName: String?) {
         val message = JSONObject()
         val body = JSONObject()
@@ -327,6 +352,50 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             message.putOpt("transaction", randomString(12))
             message.putOpt("session_id", sessionId)
             message.putOpt("handle_id", handleId)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        webSocketChannel.sendMessage(message.toString())
+    }
+
+    /**
+     * VideoCall 注册
+     */
+    fun register(handleId: BigInteger?, userName: String?) {
+        val message = JSONObject()
+        val body = JSONObject()
+        try {
+            body.putOpt("request", "register")
+            body.putOpt("username", userName)
+            message.put("body", body)
+            message.putOpt("janus", "message")
+            message.putOpt("transaction", randomString(12))
+            message.putOpt("session_id", sessionId)
+            message.putOpt("handle_id", handleId)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        webSocketChannel.sendMessage(message.toString())
+    }
+
+    /**
+     * 接收邀请
+     */
+    fun accept(handleId: BigInteger, sdp: SessionDescription) {
+        val message = JSONObject()
+        val body = JSONObject()
+        try {
+            body.putOpt("request", "accept")
+            val jsep = JSONObject()
+            jsep.putOpt("type", sdp.type.canonicalForm())
+            jsep.putOpt("sdp", sdp.description)
+            message.put("body", body)
+            message.putOpt("jsep", jsep)
+            message.putOpt("janus", "message")
+            message.putOpt("transaction", randomString(12))
+            message.putOpt("session_id", sessionId)
+            message.putOpt("handle_id", handleId)
+
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -350,7 +419,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         LogUtil.d("Received message >>>>>>>>>> $message")
         try {
             val obj = JSONObject(message)
-            val type: JanusMessageType = JanusMessageType.fromString(obj.getString("janus"))
+            val type: JanusMsgType = JanusMsgType.fromString(obj.getString("janus"))
             var transaction: String? = null
             var sender: BigInteger = BigInteger("0")
             if (obj.has("transaction")) {
@@ -365,11 +434,11 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             }
             LogUtil.d("Received message type=$type transaction = $transaction, sender = $sender")
             when (type) {
-                JanusMessageType.KEEPALIVE -> {
+                JanusMsgType.KEEPALIVE -> {
                 }
-                JanusMessageType.ACK -> {
+                JanusMsgType.ACK -> {
                 }
-                JanusMessageType.SUCCESS -> if (transaction != null) {
+                JanusMsgType.SUCCESS -> if (transaction != null) {
                     val cb = transactions[transaction]
                     LogUtil.d("Received message SUCCESS transaction = $transaction")
                     if (cb != null) {
@@ -386,7 +455,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                         }
                     }
                 }
-                JanusMessageType.ERROR -> {
+                JanusMsgType.ERROR -> {
                     if (transaction != null) {
                         val cb = transactions[transaction]
                         if (cb != null) {
@@ -395,19 +464,19 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                         }
                     }
                 }
-                JanusMessageType.HANGUP -> {
+                JanusMsgType.HANGUP -> {
                 }
-                JanusMessageType.DETACHED -> {
+                JanusMsgType.DETACHED -> {
                     if (handle != null) {
                         if (janusCallback != null) {
                             janusCallback!!.onDetached(handle.handleId)
                         }
                     }
                 }
-                JanusMessageType.EVENT -> {
+                JanusMsgType.EVENT -> {
                     if (handle != null) {
                         var pluginData
-                        : JSONObject? = null
+                                : JSONObject? = null
                         if (obj.has("plugindata")) {
                             pluginData = obj.getJSONObject("plugindata")
                         }
@@ -439,7 +508,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                         }
                     }
                 }
-                JanusMessageType.TRICKLE -> if (handle != null) {
+                JanusMsgType.TRICKLE -> if (handle != null) {
                     if (obj.has("candidate")) {
                         val candidate = obj.getJSONObject("candidate")
                         if (janusCallback != null) {
@@ -447,7 +516,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                         }
                     }
                 }
-                JanusMessageType.DESTROY -> if (janusCallback != null) {
+                JanusMsgType.DESTROY -> if (janusCallback != null) {
                     janusCallback!!.onDestroySession(sessionId)
                 }
                 else -> {

@@ -7,8 +7,6 @@
 
 package com.qtimes.jetpackdemokotlin.model
 
-import android.webkit.JsPromptResult
-
 
 enum class AtcState(val code: Int, val desc: String) {
     UNAUTHENTICATED(1, "设备未认证"),//未认证
@@ -22,7 +20,14 @@ enum class CameraAngle(val angle: Int, val desc: String) {
     NINETY(90, "90°摄像头")
 }
 
-enum class JanusMessageType {
+
+/**
+ * VideoRoom的消息类型
+ */
+enum class JanusMsgType {
+    REGISTERED,
+    ACCEPTED,
+    INCOMINGCALL,
     MESSAGE,
     TRICKLE,//收集候选者用的消息。里边存放着 candidate，janus.js收到该消息后，需要将Candidate解析出来
     DESTROY,
@@ -49,7 +54,7 @@ enum class JanusMessageType {
 
     companion object {
         @ExperimentalStdlibApi
-        fun fromString(string: String): JanusMessageType {
+        fun fromString(string: String): JanusMsgType {
             return valueOf(string.uppercase())
         }
     }

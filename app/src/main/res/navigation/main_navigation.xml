@@ -16,6 +16,13 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_janusFragment_to_videoCallFragment"
+            app:destination="@id/videoCallFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/deviceFragment"
@@ -88,4 +95,8 @@
         android:id="@+id/videoRoomFragment"
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.VideoRoomFragment"
         android:label="VideoRoomFragment" />
+    <fragment
+        android:id="@+id/videoCallFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.VideoCallFragment"
+        android:label="VideoCallFragment" />
 </navigation>

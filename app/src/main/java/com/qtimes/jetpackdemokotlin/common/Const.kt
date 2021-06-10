@@ -29,3 +29,8 @@ object Const {
     const val VIDEO_FPS_DEFAULT = 30
 
 }
+
+object JanusPlugin {
+    const val VIDEO_ROOM = "janus.plugin.videoroom"
+    const val VIDEO_CALL = "janus.plugin.videocall"
+}
