@@ -24,6 +24,8 @@ import com.qtimes.jetpackdemokotlin.model.Publisher
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
 import com.qtimes.jetpackdemokotlin.net.HttpConfig.Companion.JANUS_ICE_URL
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
+import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItem
+import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItemHolder
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
 import kotlinx.android.synthetic.main.fragment_videocall.*
@@ -39,11 +41,9 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
         const val TAG: String = "VideoCallFragment"
     }
 
-
     val videoRoomViewModel: VideoRoomViewModel by getViewModel(VideoRoomViewModel::class.java)
     private lateinit var peerConnectionFactory: PeerConnectionFactory
 
-    //    private var mPeerConnection: PeerConnection? = null
     private lateinit var audioTrack: AudioTrack
     private var videoTrack: VideoTrack? = null
     private var videoCapturer: VideoCapturer? = null
@@ -54,22 +54,20 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
     var videoCallHandlerId: BigInteger = BigInteger("0")
     private var isFrontCamera: Boolean = true
 
-    var room: JanusRoom = JanusRoom(1234) // 默认房间
-
-    private var videoItemList: MutableList<VideoItem> = arrayListOf()
+    private var videoItemList: MutableList<JanusVideoItem> = arrayListOf()
     private var adapter: VideoItemAdapter? = null
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        eglBaseContext = EglBase.create().eglBaseContext
         rv_video_call.layoutManager = GridLayoutManager(mContext, 2)
-        videoCapturer = createVideoCapturer(isFrontCamera)
+        janusClient = JanusClient(HttpConfig.JANUS_URL)
+        janusClient.setJanusCallback(this)
+        videoCapturer = janusClient.createVideoCapturer(mContext!!, isFrontCamera)
         if (videoCapturer == null) {
             return
         }
-
-        eglBaseContext = EglBase.create().eglBaseContext
-        peerConnectionFactory = createPeerConnectionFactory()
+        peerConnectionFactory = PeerConnectionUtil.createPeerConnectionFactory(eglBaseContext!!)
         val audioSource: AudioSource = peerConnectionFactory.createAudioSource(MediaConstraints())
         audioTrack = peerConnectionFactory.createAudioTrack("101", audioSource)
         surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBaseContext)
@@ -83,13 +81,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
             )
         }
         videoTrack = peerConnectionFactory.createVideoTrack("102", videoSource)
-
-        janusClient = JanusClient(HttpConfig.JANUS_URL)
-        janusClient.setJanusCallback(this)
         janusClient.connect()
-//        mPeerConnection = createPeerConnection(this)
-//        mPeerConnection?.addTrack(audioTrack)
-//        mPeerConnection?.addTrack(videoTrack)
         adapter = VideoItemAdapter()
         rv_video_call.adapter = adapter
     }
@@ -110,135 +102,12 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
         }
     }
 
-    private fun createPeerConnection(callback: CreatePeerConnectionCallback): PeerConnection? {
-        val iceServerList: MutableList<PeerConnection.IceServer> = mutableListOf()
-        iceServerList.add(PeerConnection.IceServer(JANUS_ICE_URL))
-        return peerConnectionFactory.createPeerConnection(
-            iceServerList,
-            object : PeerConnection.Observer {
-                override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
-                    LogUtil.d("onSignalingChange")
-                }
 
-                override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
-                    LogUtil.d("onIceConnectionChange")
-                }
-
-                override fun onIceConnectionReceivingChange(p0: Boolean) {
-                    LogUtil.d("onIceConnectionReceivingChange")
-                }
-
-                override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState) {
-                    if (PeerConnection.IceConnectionState.COMPLETED.name == p0.name) {
-                        callback.onIceGatheringComplete()
-                    }
-                }
-
-                override fun onIceCandidate(p0: IceCandidate) {
-                    callback.onIceCandidate(p0)
-                }
-
-                override fun onIceCandidatesRemoved(p0: Array<IceCandidate?>) {
-                    callback.onIceCandidatesRemoved(p0)
-                }
-
-                override fun onAddStream(p0: MediaStream) {
-                    callback.onAddStream(p0)
-                }
-
-                override fun onRemoveStream(p0: MediaStream) {
-                    callback.onRemoveStream(p0)
-                }
-
-                override fun onDataChannel(p0: DataChannel) {
-                    LogUtil.d("onDataChannel")
-                }
-
-                override fun onRenegotiationNeeded() {
-                    LogUtil.d("onRenegotiationNeeded")
-                }
-
-                override fun onAddTrack(p0: RtpReceiver, p1: Array<out MediaStream>) {
-                    LogUtil.d("onAddTrack")
-                }
-            })
-    }
-
-
-    private fun createPeerConnectionFactory(): PeerConnectionFactory {
-        val encoderFactory: VideoEncoderFactory =
-            DefaultVideoEncoderFactory(eglBaseContext, false, true)
-        val decoderFactory: VideoDecoderFactory = DefaultVideoDecoderFactory(eglBaseContext)
-        PeerConnectionFactory.initialize(
-            PeerConnectionFactory.InitializationOptions.builder(mContext)
-                .setEnableInternalTracer(true)
-                .createInitializationOptions()
-        )
-
-        val builder = PeerConnectionFactory.builder().setVideoDecoderFactory(decoderFactory)
-            .setVideoEncoderFactory(encoderFactory).setOptions(null)
-        return builder.createPeerConnectionFactory()
-    }
-
-    private fun createVideoCapturer(isFront: Boolean): VideoCapturer? {
-        return if (Camera2Enumerator.isSupported(mContext)) {
-            createCameraCapturer(Camera2Enumerator(mContext), isFront)
-        } else {
-            createCameraCapturer(Camera1Enumerator(true), isFront)
-        }
-    }
-
-    private fun createCameraCapturer(
-        enumerator: CameraEnumerator,
-        isFront: Boolean
-    ): VideoCapturer? {
-        val deviceNames = enumerator.deviceNames
-        if (isFront) {
-            for (deviceName in deviceNames) {
-                if (enumerator.isFrontFacing(deviceName)) {
-                    val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
-                    if (videoCapturer != null) {
-                        return videoCapturer
-                    }
-                }
-            }
-        } else {
-            for (deviceName in deviceNames) {
-                if (!enumerator.isFrontFacing(deviceName)) {
-                    val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
-                    if (videoCapturer != null) {
-                        return videoCapturer
-                    }
-                }
-            }
-        }
-        return null
-    }
-
-
-    inner class VideoItem(var userId: BigInteger?, var display: String?) {
-        var peerConnection: PeerConnection? = null
-        var videoTrack: VideoTrack? = null
-        var surfaceViewRenderer: SurfaceViewRenderer? = null
-    }
-
-    inner class VideoItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var surfaceViewRenderer: SurfaceViewRenderer =
-            itemView.findViewById(R.id.surface_view_render)
-        var tvUserId: TextView = itemView.findViewById(R.id.tv_userid)
-        var tvMute: TextView = itemView.findViewById(R.id.tv_mute)
-        var tvSwitchCamera: TextView = itemView.findViewById(R.id.tv_switch_camera)
-
-        init {
-            surfaceViewRenderer.init(eglBaseContext, null)
-        }
-    }
-
-    inner class VideoItemAdapter : RecyclerView.Adapter<VideoItemHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoItemHolder {
-            val itemView =
-                LayoutInflater.from(parent.context).inflate(R.layout.videoroom_item, parent, false)
-            val itemHolder = VideoItemHolder(itemView)
+    inner class VideoItemAdapter : RecyclerView.Adapter<JanusVideoItemHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JanusVideoItemHolder {
+            val itemView = LayoutInflater.from(parent.context)
+                .inflate(R.layout.videoroom_item, parent, false)
+            val itemHolder = JanusVideoItemHolder(eglBaseContext!!, itemView)
             itemHolder.tvMute.setOnClickListener {
                 val enable = audioTrack.enabled()
                 if (enable) {
@@ -253,7 +122,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
                     capturer.stopCapture()
                     capturer.dispose()
                     isFrontCamera = !isFrontCamera
-                    videoCapturer = createVideoCapturer(isFrontCamera)
+                    videoCapturer = janusClient.createVideoCapturer(mContext!!, isFrontCamera)
                     videoCapturer?.let {
                         it.initialize(surfaceTextureHelper, mContext, videoSource?.capturerObserver)
                         it.startCapture(
@@ -267,8 +136,8 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
             return itemHolder
         }
 
-        override fun onBindViewHolder(holder: VideoItemHolder, position: Int) {
-            val videoItem: VideoItem = videoItemList[position]
+        override fun onBindViewHolder(holder: JanusVideoItemHolder, position: Int) {
+            val videoItem: JanusVideoItem = videoItemList[position]
             videoItem.videoTrack?.addSink(holder.surfaceViewRenderer)
             videoItem.surfaceViewRenderer = holder.surfaceViewRenderer
             holder.tvUserId.text = videoItem.display
@@ -286,135 +155,9 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
         }
     }
 
-    private fun createOffer(peerConnection: PeerConnection, callback: CreateOfferCallback?) {
-        val mediaConstraints = MediaConstraints()
-        mediaConstraints.mandatory.add(
-            MediaConstraints.KeyValuePair(
-                "OfferToReceiveAudio",
-                "true"
-            )
-        );
-        mediaConstraints.mandatory.add(
-            MediaConstraints.KeyValuePair(
-                "OfferToReceiveVideo",
-                "true"
-            )
-        );
-        mediaConstraints.optional.add(
-            MediaConstraints.KeyValuePair(
-                "DtlsSrtpKeyAgreement",
-                "true"
-            )
-        )
-        peerConnection.createOffer(object : SdpObserver {
-            override fun onCreateSuccess(sdp: SessionDescription) {
 
-                peerConnection.setLocalDescription(object : SdpObserver {
-                    override fun onCreateSuccess(sdp: SessionDescription) {
-
-                    }
-
-                    override fun onSetSuccess() {
-
-                    }
-
-                    override fun onCreateFailure(error: String) {
-
-                    }
-
-                    override fun onSetFailure(error: String) {
-
-                    }
-                }, sdp)
-
-//
-                callback?.onCreateOfferSuccess(sdp)
-            }
-
-            override fun onSetSuccess() {
-                LogUtil.i("$TAG createOffer onSetSuccess")
-            }
-
-            override fun onCreateFailure(error: String) {
-                LogUtil.i("$TAG createOffer onCreateFailure, $error")
-                callback?.onCreateFailed(error)
-            }
-
-            override fun onSetFailure(error: String) {
-                LogUtil.i("$TAG createOffer onSetFailure, $error")
-                callback?.onCreateFailed(error)
-            }
-        }, mediaConstraints)
-    }
-
-
-    private fun createAnswer(peerConnection: PeerConnection, callback: CreateAnswerCallback?) {
-        val mediaConstraints = MediaConstraints()
-        mediaConstraints.mandatory.add(
-            MediaConstraints.KeyValuePair(
-                "OfferToReceiveAudio",
-                "true"
-            )
-        )
-        mediaConstraints.mandatory.add(
-            MediaConstraints.KeyValuePair(
-                "OfferToReceiveVideo",
-                "true"
-            )
-        )
-        peerConnection.createAnswer(object : SdpObserver {
-            override fun onCreateSuccess(sdp: SessionDescription) {
-                peerConnection.setLocalDescription(object : SdpObserver {
-                    override fun onCreateSuccess(sdp: SessionDescription) {}
-                    override fun onSetSuccess() {
-                        // send answer sdp
-                        LogUtil.i("$TAG createAnswer onSetSuccess")
-                        callback?.onSetAnswerSuccess(sdp)
-                    }
-
-                    override fun onCreateFailure(s: String) {
-                        LogUtil.i("$TAG createAnswer onCreateFailure, $s")
-                        callback?.onSetAnswerFailed(s)
-                    }
-
-                    override fun onSetFailure(s: String) {
-                        LogUtil.i("$TAG createAnswer onSetFailure, $s")
-                        callback?.onSetAnswerFailed(s)
-                    }
-                }, sdp)
-            }
-
-            override fun onSetSuccess() {
-                LogUtil.i("$TAG createAnswer onSetSuccess")
-            }
-
-            override fun onCreateFailure(s: String) {
-                LogUtil.i("$TAG createAnswer onCreateFailure, $s")
-            }
-
-            override fun onSetFailure(s: String) {
-                LogUtil.i("$TAG createAnswer onSetFailure, $s")
-            }
-        }, mediaConstraints)
-    }
-
-    private fun handleNewPublishers(publishers: JSONArray) {
-        for (i in 0 until publishers.length()) {
-            try {
-                val publishObj = publishers.getJSONObject(i)
-                val feedId = BigInteger(publishObj.getString("id"))
-                val display = publishObj.getString("display")
-                // attach 到发布者的 handle 上
-                janusClient.subscribeAttach(feedId)
-                room.addPublisher(Publisher(feedId, display))
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun addNewVideoItem(userId: BigInteger?, display: String?): VideoItem {
-        val videoItem = VideoItem(userId, display)
+    fun addNewVideoItem(userId: BigInteger?, display: String?): JanusVideoItem {
+        val videoItem = JanusVideoItem(userId, display)
         videoItemList.add(videoItem)
         return videoItem
     }
@@ -471,30 +214,32 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
                     launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
 
                     val peerConnection =
-                        createPeerConnection(object : CreatePeerConnectionCallback {
-                            override fun onIceGatheringComplete() {
-                                janusClient.trickleCandidateComplete(sender)
-                            }
+                        PeerConnectionUtil.createPeerConnection(
+                            peerConnectionFactory,
+                            object : CreatePeerConnectionCallback {
+                                override fun onIceGatheringComplete() {
+                                    janusClient.trickleCandidateComplete(sender)
+                                }
 
-                            override fun onIceCandidate(candidate: IceCandidate) {
-                                janusClient.trickleCandidate(sender, candidate)
-                            }
+                                override fun onIceCandidate(candidate: IceCandidate) {
+                                    janusClient.trickleCandidate(sender, candidate)
+                                }
 
-                            override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {}
+                                override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {}
 
-                            override fun onAddStream(stream: MediaStream) {
-                                if (stream.videoTracks.size > 0) {
-                                    launchMain {
-                                        videoItem.videoTrack = stream.videoTracks[0]
-                                        adapter!!.notifyDataSetChanged()
+                                override fun onAddStream(stream: MediaStream) {
+                                    if (stream.videoTracks.size > 0) {
+                                        launchMain {
+                                            videoItem.videoTrack = stream.videoTracks[0]
+                                            adapter!!.notifyDataSetChanged()
+                                        }
                                     }
                                 }
-                            }
 
-                            override fun onRemoveStream(stream: MediaStream) {
+                                override fun onRemoveStream(stream: MediaStream) {
 
-                            }
-                        })
+                                }
+                            })
                     peerConnection?.addTrack(audioTrack)
                     peerConnection?.addTrack(videoTrack)
                     videoItem.peerConnection = peerConnection!!
@@ -507,8 +252,12 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
                             override fun onSetSuccess() {
                                 launchMain {
                                     LogUtil.d("videoCapturer: $videoCapturer")
-                                    videoCapturer!!.startCapture(1080, 720, 30)
-                                    val videoItemLocal: VideoCallFragment.VideoItem =
+                                    videoCapturer!!.startCapture(
+                                        Const.VIEW_WIDTH_DEFAULT,
+                                        Const.VIEW_HEIGHT_DEFAULT,
+                                        Const.VIDEO_FPS_DEFAULT
+                                    )
+                                    val videoItemLocal: JanusVideoItem =
                                         addNewVideoItem(null, videoRoomViewModel.userName.value)
                                     videoItemLocal.peerConnection = peerConnection
                                     videoItemLocal.videoTrack = videoTrack!!
@@ -516,16 +265,17 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
                                     adapter!!.notifyItemInserted(videoItemList.size - 1)
                                 }
 
-                                // 这时应该回复网关一个 start ，附带自己的 sdp answer
-                                createAnswer(peerConnection, object : CreateAnswerCallback {
-                                    override fun onSetAnswerSuccess(sdp: SessionDescription) {
-                                        janusClient.accept(handleId, sdp)
-                                    }
+                                PeerConnectionUtil.createAnswer(
+                                    peerConnection,
+                                    object : CreateAnswerCallback {
+                                        override fun onSetAnswerSuccess(sdp: SessionDescription) {
+                                            janusClient.accept(handleId, sdp)
+                                        }
 
-                                    override fun onSetAnswerFailed(error: String) {
+                                        override fun onSetAnswerFailed(error: String) {
 
-                                    }
-                                })
+                                        }
+                                    })
                             }
 
                             override fun onCreateFailure(error: String) {
@@ -542,8 +292,18 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
                 }
             }
 
-            JanusMsgType.ACCEPTED -> {
-
+            JanusMsgType.HANGUP -> {
+                launchMain {
+                    val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
+                    var index = 0
+                    while (it.hasNext()) {
+                        it.next()
+                        it.remove()
+                        adapter!!.notifyItemRemoved(index)
+                        index++
+                    }
+                    janusClient.disconnect()
+                }
             }
 
             else -> {

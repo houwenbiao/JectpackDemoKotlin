@@ -7,6 +7,8 @@
 
 package com.qtimes.jetpackdemokotlin.janus
 
+import android.content.Context
+import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.model.JanusMsgType
 import com.qtimes.jetpackdemokotlin.model.PluginHandle
 import com.qtimes.jetpackdemokotlin.model.Transaction
@@ -17,12 +19,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import org.webrtc.IceCandidate
-import org.webrtc.SessionDescription
+import org.webrtc.*
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ConcurrentHashMap
+import javax.microedition.khronos.egl.EGLContext
 
 /**
  * Author: JackHou
@@ -179,27 +181,6 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         }
     }
 
-    fun createOffer(handleId: BigInteger, sdp: SessionDescription) {
-        val message = JSONObject()
-        try {
-            val publish = JSONObject()
-            publish.putOpt("audio", true)
-            publish.putOpt("video", true)
-            val jsep = JSONObject()
-            jsep.putOpt("type", sdp.type)
-            jsep.putOpt("sdp", sdp.description)
-            message.putOpt("janus", "message")
-            message.putOpt("body", publish)
-            message.putOpt("jsep", jsep)
-            message.putOpt("transaction", randomString(12))
-            message.putOpt("session_id", sessionId)
-            message.putOpt("handle_id", handleId)
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-        webSocketChannel.sendMessage(message.toString())
-    }
-
     /**
      * 开始订阅
      *
@@ -223,7 +204,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             message.putOpt("handle_id", subscriptionHandleId)
             if (sdp != null) {
                 val jsep = JSONObject()
-                jsep.putOpt("type", sdp.type)
+                jsep.putOpt("type", sdp.type.canonicalForm())
                 jsep.putOpt("sdp", sdp.description)
                 message.putOpt("jsep", jsep)
             }
@@ -241,7 +222,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             publish.putOpt("audio", true)
             publish.putOpt("video", true)
             val jsep = JSONObject()
-            jsep.putOpt("type", sdp.type)
+            jsep.putOpt("type", sdp.type.canonicalForm())
             jsep.putOpt("sdp", sdp.description)
             message.putOpt("janus", "message")
             message.putOpt("body", publish)
@@ -253,28 +234,6 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             e.printStackTrace()
         }
         webSocketChannel.sendMessage(message.toString())
-    }
-
-
-    fun record(handleId: BigInteger?, record: Boolean, name: String?) {
-        val tid: String = randomString(12)
-        try {
-            val obj = JSONObject()
-            val msg = JSONObject()
-            msg.put("request", "set")
-            msg.put("audio", true)
-            msg.put("video", true)
-            msg.put("record", record)
-            msg.put("filename", name)
-            obj.put("janus", "message")
-            obj.put("transaction", tid)
-            obj.put("session_id", sessionId)
-            obj.put("handle_id", handleId)
-            obj.put("body", msg)
-            webSocketChannel.sendMessage(obj.toString())
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
     }
 
     /**
@@ -465,6 +424,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                     }
                 }
                 JanusMsgType.HANGUP -> {
+                    janusCallback?.onHangup(handle!!.handleId)
                 }
                 JanusMsgType.DETACHED -> {
                     if (handle != null) {
@@ -583,5 +543,40 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             sb.append(str[random.nextInt(str.length)])
         }
         return sb.toString()
+    }
+
+    fun createVideoCapturer(context:Context, isFront: Boolean): VideoCapturer? {
+        return if (Camera2Enumerator.isSupported(context)) {
+            createCameraCapturer(Camera2Enumerator(context), isFront)
+        } else {
+            createCameraCapturer(Camera1Enumerator(true), isFront)
+        }
+    }
+
+    private fun createCameraCapturer(
+        enumerator: CameraEnumerator,
+        isFront: Boolean
+    ): VideoCapturer? {
+        val deviceNames = enumerator.deviceNames
+        if (isFront) {
+            for (deviceName in deviceNames) {
+                if (enumerator.isFrontFacing(deviceName)) {
+                    val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
+                    if (videoCapturer != null) {
+                        return videoCapturer
+                    }
+                }
+            }
+        } else {
+            for (deviceName in deviceNames) {
+                if (!enumerator.isFrontFacing(deviceName)) {
+                    val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
+                    if (videoCapturer != null) {
+                        return videoCapturer
+                    }
+                }
+            }
+        }
+        return null
     }
 }
