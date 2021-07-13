@@ -7,6 +7,7 @@
 
 package com.qtimes.jetpackdemokotlin.model
 
+import java.util.*
 
 enum class AtcState(val code: Int, val desc: String) {
     UNAUTHENTICATED(1, "设备未认证"),//未认证
@@ -20,6 +21,26 @@ enum class CameraAngle(val angle: Int, val desc: String) {
     NINETY(90, "90°摄像头")
 }
 
+
+enum class JanusJsonKey {
+    ID,
+    DISPLAY,
+    VIDEOCALL,
+    RESULT,
+    EVENT,
+    SDP,
+    USERNAME,
+    VIDEOROOM,
+    PUBLISHERS,
+    CONFIGURED,
+    UNPUBLISHED,
+    LEAVING,
+    STARTED;
+
+    open fun canonicalForm(): String {
+        return name.toLowerCase(Locale.US)
+    }
+}
 
 /**
  * VideoRoom的消息类型

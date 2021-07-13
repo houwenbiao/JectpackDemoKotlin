@@ -35,7 +35,10 @@ class DeviceRepository(iUIActionEvent: IUIActionEvent) :
         )
     }
 
-    fun getDoors(deviceName: String, callbackFun: (RequestCallback<MutableList<DoorInfo>>.() -> Unit)?) {
+    fun getDoors(
+        deviceName: String,
+        callbackFun: (RequestCallback<MutableList<DoorInfo>>.() -> Unit)?
+    ) {
         mainRemoteDataSource.enqueue({ getDoorList(deviceName) }, callbackFun = callbackFun)
     }
 }
@@ -101,5 +104,30 @@ class UserRepository(
      */
     fun findUserByAccountOrPhone(param: String): LiveData<User?> =
         appDatabase.getUserDao().findUserByAccountOrPhone(param)
+}
+
+class DeviceMapRepository(iUIActionEvent: IUIActionEvent, private val appDatabase: AppDatabase) :
+    BaseRepository(iUIActionEvent) {
+
+    /**
+     * 添加设备与位置的绑定关系
+     *//*
+    suspend fun addDeviceMap(deviceMap: DeviceMap): Long {
+        return appDatabase.getDeviceMapDao().add(deviceMap)
+    }
+
+    *//**
+     * 查找绑定关系
+     *//*
+    suspend fun findDeviceMap(did: String, lid: String): LiveData<DeviceMap> {
+        return appDatabase.getDeviceMapDao().findByDidOrLid(did, lid)
+    }
+
+    *//**
+     * 查找所有绑定关系
+     *//*
+    suspend fun findAll(): List<DeviceMap> {
+        return appDatabase.getDeviceMapDao().findAll()
+    }*/
 }
 

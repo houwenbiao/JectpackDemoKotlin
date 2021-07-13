@@ -2,7 +2,7 @@
  * Created with JackHou
  * Date: 2021/6/11
  * Time: 10:48
- * Description:
+ * Description:PeerConnection工具类
  */
 
 package com.qtimes.jetpackdemokotlin.janus
@@ -14,10 +14,6 @@ import com.qtimes.jetpackdemokotlin.ui.fragment.VideoRoomFragment
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import org.webrtc.*
 
-/**
- * Author: JackHou
- * Date: 2021/6/11.
- */
 class PeerConnectionUtil {
     companion object {
         fun createPeerConnectionFactory(eglBaseContext: EglBase.Context): PeerConnectionFactory {

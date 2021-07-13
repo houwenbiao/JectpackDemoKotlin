@@ -14,8 +14,10 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.qtimes.jetpackdemokotlin.common.MainApplication
+import com.qtimes.jetpackdemokotlin.model.DeviceMap
 import com.qtimes.jetpackdemokotlin.model.User
 import com.qtimes.jetpackdemokotlin.model.UserState
+import com.qtimes.jetpackdemokotlin.room.dao.DeviceMapDao
 import com.qtimes.jetpackdemokotlin.room.dao.UserDao
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 
@@ -23,6 +25,8 @@ import com.qtimes.jetpackdemokotlin.utils.LogUtil
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getUserDao(): UserDao
+
+    abstract fun getDeviceMapDao(): DeviceMapDao
 
     companion object {
 

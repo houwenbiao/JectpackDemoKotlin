@@ -13,17 +13,16 @@ import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.databinding.FragmentDeviceBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.viewmodel.DeviceViewModel
-import kotlinx.android.synthetic.main.fragment_device.*
 
 
 class DeviceFragment : BaseFragment() {
-    lateinit var fragmentDeviceBinding: FragmentDeviceBinding
+    lateinit var binding: FragmentDeviceBinding
     private val devModel by getViewModel(DeviceViewModel::class.java)
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btn_jump_atc_page.setOnClickListener {
+        binding.btnJumpAtcPage.setOnClickListener {
             mNavController.navigate(DeviceFragmentDirections.actionDeviceFragmentToAtcFragment())
         }
     }
@@ -33,7 +32,7 @@ class DeviceFragment : BaseFragment() {
     }
 
     override fun bindingSetViewModels() {
-        fragmentDeviceBinding = viewDataBinding as FragmentDeviceBinding
-        fragmentDeviceBinding.devVM = devModel
+        binding = viewDataBinding as FragmentDeviceBinding
+        binding.devVM = devModel
     }
 }

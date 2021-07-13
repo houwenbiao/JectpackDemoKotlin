@@ -21,20 +21,21 @@ import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.utils.ActivityMgr
 import com.qtimes.jetpackdemokotlin.utils.DataStoreUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.WelcomeViewModel
-import kotlinx.android.synthetic.main.fragment_start.*
 
 
 class StartFragment : BaseFragment() {
 
     private val welcomeViewModel: WelcomeViewModel by getViewModel(WelcomeViewModel::class.java)
     private val actionStart2Login = StartFragmentDirections.actionStartFragmentToLoginFragment()
+    private lateinit var binding: FragmentStartBinding
+
     override fun getLayoutId(): Int {
         return R.layout.fragment_start
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btn_jump.setOnClickListener {
+        binding.btnJump.setOnClickListener {
             jumpToHome()
         }
         welcomeViewModel.timerCount.observe(mLifecycleOwner) {
@@ -63,7 +64,7 @@ class StartFragment : BaseFragment() {
     }
 
     override fun bindingSetViewModels() {
-        val fragmentStartBinding = viewDataBinding as FragmentStartBinding
-        fragmentStartBinding.welcomeViewModel = welcomeViewModel
+        binding = viewDataBinding as FragmentStartBinding
+        binding.welcomeViewModel = welcomeViewModel
     }
 }

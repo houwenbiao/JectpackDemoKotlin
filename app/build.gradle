@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id "kotlin-kapt"
-    id "kotlin-android-extensions"
     id "androidx.navigation.safeargs.kotlin"
     id "dagger.hilt.android.plugin"
 }
@@ -22,7 +21,11 @@ android {
     }
 
     buildFeatures {
-        dataBinding = true
+        dataBinding true
+    }
+
+    viewBinding {
+        enabled = true
     }
 
     buildTypes {
@@ -49,11 +52,15 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recyclerviewVersion"
     implementation "androidx.annotation:annotation:$annotationVersion"
     implementation "androidx.preference:preference-ktx:$preferenceVersion"
+    implementation project(path: ':libzxing')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$junitXVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     implementation "com.android.support:multidex:$multidexVersion"
     implementation "com.google.android.material:material:$materialVersion"
+
+    //RxPermission
+    implementation "com.github.tbruyelle:rxpermissions:${rxpermissionsVersion}"
 
     //DrawerLayout
     implementation "com.mikepenz:materialdrawer:${materialDrawerVersion}"
@@ -125,5 +132,8 @@ dependencies {
     })
 
     //WebRTC
-    implementation 'org.webrtc:google-webrtc:1.0.32006'
+    implementation "org.webrtc:google-webrtc:${webrtcVersion}"
+
+    //zxing
+    implementation "com.google.zxing:core:$zxingVersion"
 }

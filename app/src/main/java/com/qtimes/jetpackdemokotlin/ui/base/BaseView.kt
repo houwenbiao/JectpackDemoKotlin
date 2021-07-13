@@ -112,6 +112,7 @@ abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
         progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
         progressDialog.setCanceledOnTouchOutside(false)
+        bindingSetViewModels()
     }
 
 

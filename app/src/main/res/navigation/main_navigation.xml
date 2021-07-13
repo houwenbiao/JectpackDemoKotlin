@@ -99,4 +99,16 @@
         android:id="@+id/videoCallFragment"
         android:name="com.qtimes.jetpackdemokotlin.ui.fragment.VideoCallFragment"
         android:label="VideoCallFragment" />
+    <fragment
+        android:id="@+id/constructionFragment"
+        android:name="com.qtimes.jetpackdemokotlin.ui.fragment.ConstructionFragment"
+        android:label="ConstructionFragment">
+        <action
+            android:id="@+id/action_constructionFragment_to_scanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
 </navigation>

@@ -2,7 +2,7 @@
  * Created with JackHou
  * Date: 2021/5/19
  * Time: 14:00
- * Description:
+ * Description:WebSocket相关的逻辑
  */
 
 package com.qtimes.jetpackdemokotlin.janus
@@ -10,10 +10,6 @@ package com.qtimes.jetpackdemokotlin.janus
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import okhttp3.*
 
-/**
- * Author: JackHou
- * Date: 2021/5/19.
- */
 class WebSocketChannel {
 
     companion object {
@@ -31,7 +27,7 @@ class WebSocketChannel {
      * Sec-WebSocket-Protocol=janus-protocol"
      */
     fun connect(url: String) {
-        val client: OkHttpClient = OkHttpClient()
+        val client = OkHttpClient()
         val request: Request = Request.Builder()
             .header("Sec-WebSocket-Protocol", "janus-protocol")
             .url(url)

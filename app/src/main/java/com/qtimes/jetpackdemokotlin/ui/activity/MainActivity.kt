@@ -7,11 +7,8 @@
 
 package com.qtimes.jetpackdemokotlin.ui.activity
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.View
-import android.view.Window
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -28,8 +25,7 @@ import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.databinding.ActivityMainBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseActivity
 import com.qtimes.jetpackdemokotlin.viewmodel.MainViewModel
-import kotlinx.android.synthetic.main.activity_main.*
-import qiu.niorgai.StatusBarCompat
+import com.tbruyelle.rxpermissions3.RxPermissions
 
 
 class MainActivity : BaseActivity() {
@@ -39,23 +35,34 @@ class MainActivity : BaseActivity() {
     private val mainViewModel by getViewModel(MainViewModel::class.java)
     private var mExitTime: Long = 0
     private var mLastBackClickTime: Long = 0
+    private lateinit var mRxPermissions: RxPermissions
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mRxPermissions = RxPermissions(this)
+        mRxPermissions.request(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        ).subscribe {
+            if (it) {
+                showToast(getString(R.string.get_permission_success))
+            } else {
+                showToast(getString(R.string.get_permission_failed))
+            }
+        }
         val fragmentManager = supportFragmentManager
-        val navHostFragment =
-            fragmentManager.findFragmentById(R.id.main_fragment) as NavHostFragment?
+        val navHostFragment = fragmentManager.findFragmentById(R.id.main_fragment) as NavHostFragment?
         navHostFragment?.let {
             mNavController = it.navController
-            bottom_nav_view.setupWithNavController(it.navController)
+            binding.bottomNavView.setupWithNavController(it.navController)
         }
 
         //DrawerLayout
         val item1 = PrimaryDrawerItem().apply { nameRes = R.string.app_name; identifier = 1 }
         val item2 = SecondaryDrawerItem().apply { nameRes = R.string.user_name; identifier = 2 }
-        slider.itemAdapter.add(item1, DividerDrawerItem(), item2, SecondaryDrawerItem())
-        slider.accountHeader = AccountHeaderView(this).apply {
+        binding.slider.itemAdapter.add(item1, DividerDrawerItem(), item2, SecondaryDrawerItem())
+        binding.slider.accountHeader = AccountHeaderView(this).apply {
             addProfiles(ProfileDrawerItem().apply {
                 nameText = "Jack Hou"; descriptionText = "jackhou1990@163.com"; iconRes =
                 R.drawable.ic_account; identifier = 102

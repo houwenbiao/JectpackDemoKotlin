@@ -3,12 +3,14 @@
  * Date: 2021/5/19
  * Time: 14:28
  * Description:JanusClient
+ * 参考1：https://blog.csdn.net/Java_lilin/article/details/104007291
+ * 参考2：https://github.com/benwtrent/janus-gateway-android
+ * 参考3：https://zhuanlan.zhihu.com/p/149324861?utm_source=wechat_session
  */
 
 package com.qtimes.jetpackdemokotlin.janus
 
 import android.content.Context
-import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.model.JanusMsgType
 import com.qtimes.jetpackdemokotlin.model.PluginHandle
 import com.qtimes.jetpackdemokotlin.model.Transaction
@@ -24,15 +26,7 @@ import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ConcurrentHashMap
-import javax.microedition.khronos.egl.EGLContext
 
-/**
- * Author: JackHou
- * Date: 2021/5/19.
- * 参考1：https://blog.csdn.net/Java_lilin/article/details/104007291
- * 参考2：https://github.com/benwtrent/janus-gateway-android
- * 参考3：https://zhuanlan.zhihu.com/p/149324861?utm_source=wechat_session
- */
 class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback {
 
     private val attachedPlugins: ConcurrentHashMap<BigInteger, PluginHandle> =
@@ -101,6 +95,9 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
     }
 
 
+    /**
+     * 销毁session
+     */
     fun destroySession() {
         val tid = randomString(12)
         transactions[tid] = object : Transaction(tid) {
@@ -235,6 +232,28 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         }
         webSocketChannel.sendMessage(message.toString())
     }
+
+
+    /**
+     * VideoCall Hangup
+     */
+    fun hangup(handleId: BigInteger?) {
+        val tid: String = randomString(12)
+        try {
+            val obj = JSONObject()
+            val msg = JSONObject()
+            msg.put("request", "hangup")
+            obj.put("janus", "message")
+            obj.put("transaction", tid)
+            obj.put("session_id", sessionId)
+            obj.put("handle_id", handleId)
+            obj.put("body", msg)
+            webSocketChannel.sendMessage(obj.toString())
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+    }
+
 
     /**
      * 订阅
@@ -380,7 +399,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             val obj = JSONObject(message)
             val type: JanusMsgType = JanusMsgType.fromString(obj.getString("janus"))
             var transaction: String? = null
-            var sender: BigInteger = BigInteger("0")
+            var sender = BigInteger("0")
             if (obj.has("transaction")) {
                 transaction = obj.getString("transaction")
             }
@@ -483,9 +502,9 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                     LogUtil.d(message)
                 }
             }
-        } catch (ex: JSONException) {
+        } catch (e: JSONException) {
             if (janusCallback != null) {
-                janusCallback!!.onError(ex.message)
+                janusCallback!!.onError(e.message)
             }
         }
     }
@@ -545,7 +564,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         return sb.toString()
     }
 
-    fun createVideoCapturer(context:Context, isFront: Boolean): VideoCapturer? {
+    fun createVideoCapturer(context: Context, isFront: Boolean): VideoCapturer? {
         return if (Camera2Enumerator.isSupported(context)) {
             createCameraCapturer(Camera2Enumerator(context), isFront)
         } else {

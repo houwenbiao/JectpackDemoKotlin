@@ -8,10 +8,10 @@
     <item
         android:id="@+id/janusFragment"
         android:icon="@drawable/ic_market"
-        android:title="@string/txt_news" />
+        android:title="@string/janus" />
 
     <item
-        android:id="@+id/dayQuestionFragment"
+        android:id="@+id/constructionFragment"
         android:icon="@drawable/ic_me"
-        android:title="@string/txt_day_question" />
+        android:title="@string/construction" />
 </menu>

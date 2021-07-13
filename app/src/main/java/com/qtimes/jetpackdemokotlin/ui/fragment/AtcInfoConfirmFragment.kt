@@ -15,7 +15,6 @@ import com.qtimes.jetpackdemokotlin.databinding.FragmentAtcInfoConfirmBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.AtcInfoConfirmViewModel
-import kotlinx.android.synthetic.main.fragment_atc_info_confirm.*
 
 /**
  * Author: JackHou
@@ -25,7 +24,7 @@ import kotlinx.android.synthetic.main.fragment_atc_info_confirm.*
 class AtcInfoConfirmFragment : BaseFragment() {
 
     private val atcInfoConfirmViewModel by getViewModel(AtcInfoConfirmViewModel::class.java)
-
+    private lateinit var binding: FragmentAtcInfoConfirmBinding;
     override fun getLayoutId(): Int {
         return R.layout.fragment_atc_info_confirm
     }
@@ -38,18 +37,18 @@ class AtcInfoConfirmFragment : BaseFragment() {
         atcInfoConfirmViewModel.doorInfo.postValue(doorInfo)
         atcInfoConfirmViewModel.cameraAngle.postValue(cameraInfo)
         LogUtil.d("doorInfo: ${doorInfo.name},  cameraInfo: ${cameraInfo.angle}")
-        back_title_atc_info.onBackClickListener {
+        binding.backTitleAtcInfo.onBackClickListener {
             mNavController.navigateUp()
         }
 
-        btn_door_activate_confirm.setOnClickListener {
+        binding.btnDoorActivateConfirm.setOnClickListener {
 
         }
     }
 
     override fun bindingSetViewModels() {
         super.bindingSetViewModels()
-        val fragmentAtcInfoConfirmBinding = viewDataBinding as FragmentAtcInfoConfirmBinding
-        fragmentAtcInfoConfirmBinding.atcConfirmVM = atcInfoConfirmViewModel
+        binding = viewDataBinding as FragmentAtcInfoConfirmBinding
+        binding.atcConfirmVM = atcInfoConfirmViewModel
     }
 }

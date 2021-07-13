@@ -12,19 +12,18 @@ import android.view.View
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.databinding.FragmentJanusBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
-import kotlinx.android.synthetic.main.fragment_janus.*
 
 
 class JanusFragment : BaseFragment() {
-    lateinit var fragmentJanusBinding: FragmentJanusBinding
+    lateinit var binding: FragmentJanusBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        jump_video_room.setOnClickListener {
+        binding.jumpVideoRoom.setOnClickListener {
             mNavController.navigate(JanusFragmentDirections.actionJanusFragmentToVideoRoomFragment())
         }
 
-        jump_video_call.setOnClickListener {
+        binding.jumpVideoCall.setOnClickListener {
             mNavController.navigate(JanusFragmentDirections.actionJanusFragmentToVideoCallFragment())
         }
     }
@@ -34,6 +33,6 @@ class JanusFragment : BaseFragment() {
     }
 
     override fun bindingSetViewModels() {
-        fragmentJanusBinding = viewDataBinding as FragmentJanusBinding
+        binding = viewDataBinding as FragmentJanusBinding
     }
 }

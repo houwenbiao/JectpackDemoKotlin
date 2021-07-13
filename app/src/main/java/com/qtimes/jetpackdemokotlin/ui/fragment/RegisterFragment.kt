@@ -14,21 +14,20 @@ import com.qtimes.jetpackdemokotlin.databinding.FragmentRegisterBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.WelcomeViewModel
-import kotlinx.android.synthetic.main.fragment_register.*
-import kotlinx.coroutines.launch
 
 
 class RegisterFragment : BaseFragment() {
 
     val welcomeViewModel by getViewModel(WelcomeViewModel::class.java)
+    private lateinit var binding: FragmentRegisterBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        txt_cancel.setOnClickListener {
+        binding.txtCancel.setOnClickListener {
             mNavController.navigateUp()
         }
 
-        btn_register.setOnClickListener {
+        binding.btnRegister.setOnClickListener {
             launchMain {
                 val success = welcomeViewModel.registerUser()
                 LogUtil.d("register user: $success")
@@ -45,7 +44,7 @@ class RegisterFragment : BaseFragment() {
     }
 
     override fun bindingSetViewModels() {
-        val binding: FragmentRegisterBinding = viewDataBinding as FragmentRegisterBinding
+        binding = viewDataBinding as FragmentRegisterBinding
         binding.welcomeViewModel = welcomeViewModel
     }
 }

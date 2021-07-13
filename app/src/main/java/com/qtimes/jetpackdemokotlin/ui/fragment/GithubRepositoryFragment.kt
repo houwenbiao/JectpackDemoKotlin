@@ -19,23 +19,22 @@ import com.qtimes.jetpackdemokotlin.paging.adapter.FooterAdapter
 import com.qtimes.jetpackdemokotlin.paging.adapter.RepositoryAdapter
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.viewmodel.ArticleViewModel
-import kotlinx.android.synthetic.main.fragment_github_repository.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
 class GithubRepositoryFragment : BaseFragment() {
 
-    lateinit var fragmentArticleBinding: FragmentGithubRepositoryBinding
+    lateinit var binding: FragmentGithubRepositoryBinding
     private val articleViewModel by getViewModel(ArticleViewModel::class.java)
     private val repositoryAdapter = RepositoryAdapter()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recycler_view.adapter =
+        binding.recyclerView.adapter =
             repositoryAdapter.withLoadStateFooter(FooterAdapter { repositoryAdapter.retry() })
-        recycler_view.layoutManager = LinearLayoutManager(mContext)
+        binding.recyclerView.layoutManager = LinearLayoutManager(mContext)
         lifecycleScope.launch {
             articleViewModel.queryGithubRepository().collectLatest { pagingData ->
                 repositoryAdapter.submitData(pagingData)
@@ -45,16 +44,16 @@ class GithubRepositoryFragment : BaseFragment() {
         repositoryAdapter.addLoadStateListener {
             when (it.refresh) {
                 is LoadState.NotLoading -> {
-                    progress_bar.visibility = View.INVISIBLE
-                    recycler_view.visibility = View.VISIBLE
+                    binding.progressBar.visibility = View.INVISIBLE
+                    binding.recyclerView.visibility = View.VISIBLE
                 }
                 is LoadState.Loading -> {
-                    progress_bar.visibility = View.VISIBLE
-                    recycler_view.visibility = View.INVISIBLE
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.recyclerView.visibility = View.INVISIBLE
                 }
                 is LoadState.Error -> {
                     val state = it.refresh as LoadState.Error
-                    progress_bar.visibility = View.INVISIBLE
+                    binding.progressBar.visibility = View.INVISIBLE
                     Toast.makeText(
                         mContext,
                         "Load Error: ${state.error.message}",
@@ -70,6 +69,6 @@ class GithubRepositoryFragment : BaseFragment() {
     }
 
     override fun bindingSetViewModels() {
-        fragmentArticleBinding = viewDataBinding as FragmentGithubRepositoryBinding
+        binding = viewDataBinding as FragmentGithubRepositoryBinding
     }
 }

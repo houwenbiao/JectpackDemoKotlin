@@ -11,26 +11,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.Const
 import com.qtimes.jetpackdemokotlin.common.JanusPlugin
+import com.qtimes.jetpackdemokotlin.databinding.FragmentVideocallBinding
 import com.qtimes.jetpackdemokotlin.janus.*
+import com.qtimes.jetpackdemokotlin.model.JanusJsonKey
 import com.qtimes.jetpackdemokotlin.model.JanusMsgType
-import com.qtimes.jetpackdemokotlin.model.JanusRoom
-import com.qtimes.jetpackdemokotlin.model.Publisher
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
-import com.qtimes.jetpackdemokotlin.net.HttpConfig.Companion.JANUS_ICE_URL
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItem
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItemHolder
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
-import kotlinx.android.synthetic.main.fragment_videocall.*
-import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
 import java.math.BigInteger
@@ -43,6 +38,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
 
     val videoRoomViewModel: VideoRoomViewModel by getViewModel(VideoRoomViewModel::class.java)
     private lateinit var peerConnectionFactory: PeerConnectionFactory
+    private lateinit var binding: FragmentVideocallBinding
 
     private lateinit var audioTrack: AudioTrack
     private var videoTrack: VideoTrack? = null
@@ -60,7 +56,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         eglBaseContext = EglBase.create().eglBaseContext
-        rv_video_call.layoutManager = GridLayoutManager(mContext, 2)
+        binding.rvVideoCall.layoutManager = GridLayoutManager(mContext, 2)
         janusClient = JanusClient(HttpConfig.JANUS_URL)
         janusClient.setJanusCallback(this)
         videoCapturer = janusClient.createVideoCapturer(mContext!!, isFrontCamera)
@@ -83,7 +79,12 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
         videoTrack = peerConnectionFactory.createVideoTrack("102", videoSource)
         janusClient.connect()
         adapter = VideoItemAdapter()
-        rv_video_call.adapter = adapter
+        binding.rvVideoCall.adapter = adapter
+    }
+
+    override fun bindingSetViewModels() {
+        super.bindingSetViewModels()
+        binding = viewDataBinding as FragmentVideocallBinding
     }
 
     override fun getLayoutId(): Int {
@@ -196,21 +197,24 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
         if (msg == null) {
             return
         }
-        if (!msg.has("videocall")) {
+        if (!msg.has(JanusJsonKey.VIDEOCALL.canonicalForm())) {
             return
         }
 
-        val result: JSONObject = msg.getJSONObject("result") ?: return
+        val result: JSONObject = msg.getJSONObject(JanusJsonKey.RESULT.canonicalForm()) ?: return
 
-        val event: String = result.getString("event")
+        val event: String = result.getString(JanusJsonKey.EVENT.canonicalForm())
 
         when (JanusMsgType.fromString(event)) {
-            JanusMsgType.INCOMINGCALL -> {
 
+            JanusMsgType.INCOMINGCALL -> {
                 if (jsep != null) {
-                    val sdp = jsep.getString("sdp")
+                    val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
                     // 添加用户到界面
-                    val videoItem = addNewVideoItem(BigInteger("123"), result.getString("username"))
+                    val videoItem = addNewVideoItem(
+                        BigInteger("123"),
+                        result.getString(JanusJsonKey.USERNAME.canonicalForm())
+                    )
                     launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
 
                     val peerConnection =
@@ -225,7 +229,9 @@ class VideoCallFragment : BaseFragment(), JanusCallback {
                                     janusClient.trickleCandidate(sender, candidate)
                                 }
 
-                                override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {}
+                                override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {
+
+                                }
 
                                 override fun onAddStream(stream: MediaStream) {
                                     if (stream.videoTracks.size > 0) {

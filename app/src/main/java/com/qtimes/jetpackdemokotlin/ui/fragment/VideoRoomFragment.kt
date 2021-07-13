@@ -11,28 +11,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.Const
 import com.qtimes.jetpackdemokotlin.common.JanusPlugin
+import com.qtimes.jetpackdemokotlin.databinding.FragmentVideoroomBinding
 import com.qtimes.jetpackdemokotlin.janus.*
 import com.qtimes.jetpackdemokotlin.janus.PeerConnectionUtil.Companion.createAnswer
 import com.qtimes.jetpackdemokotlin.janus.PeerConnectionUtil.Companion.createOffer
 import com.qtimes.jetpackdemokotlin.janus.PeerConnectionUtil.Companion.createPeerConnection
 import com.qtimes.jetpackdemokotlin.janus.PeerConnectionUtil.Companion.createPeerConnectionFactory
+import com.qtimes.jetpackdemokotlin.model.JanusJsonKey
 import com.qtimes.jetpackdemokotlin.model.JanusMsgType
 import com.qtimes.jetpackdemokotlin.model.JanusRoom
 import com.qtimes.jetpackdemokotlin.model.Publisher
 import com.qtimes.jetpackdemokotlin.net.HttpConfig
-import com.qtimes.jetpackdemokotlin.net.HttpConfig.Companion.JANUS_ICE_URL
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItem
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItemHolder
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
-import kotlinx.android.synthetic.main.fragment_videoroom.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -45,7 +44,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
         const val TAG: String = "VideoRoomFragment"
     }
 
-
+    private lateinit var binding: FragmentVideoroomBinding
     val videoRoomViewModel: VideoRoomViewModel by getViewModel(VideoRoomViewModel::class.java)
     private lateinit var peerConnectionFactory: PeerConnectionFactory
     private var mPeerConnection: PeerConnection? = null
@@ -70,7 +69,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
         eglBaseContext = EglBase.create().eglBaseContext
         janusClient = JanusClient(HttpConfig.JANUS_URL)
         janusClient.setJanusCallback(this)
-        rv_vm.layoutManager = GridLayoutManager(mContext, 2)
+        binding.rvVm.layoutManager = GridLayoutManager(mContext, 2)
         videoCapturer = janusClient.createVideoCapturer(mContext!!, isFrontCamera)
         if (videoCapturer == null) {
             return
@@ -94,11 +93,16 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
         mPeerConnection?.addTrack(audioTrack)
         mPeerConnection?.addTrack(videoTrack)
         adapter = VideoItemAdapter()
-        rv_vm.adapter = adapter
+        binding.rvVm.adapter = adapter
     }
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_videoroom
+    }
+
+    override fun bindingSetViewModels() {
+        super.bindingSetViewModels()
+        binding = viewDataBinding as FragmentVideoroomBinding
     }
 
     override fun onDestroy() {
@@ -222,11 +226,11 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
         if (msg == null) {
             return
         }
-        if (!msg.has("videoroom")) {
+        if (!msg.has(JanusJsonKey.VIDEOROOM.canonicalForm())) {
             return
         }
         LogUtil.i("onMessage: $msg")
-        when (JanusMsgType.fromString(msg.getString("videoroom"))) {
+        when (JanusMsgType.fromString(msg.getString(JanusJsonKey.VIDEOROOM.canonicalForm()))) {
             JanusMsgType.JOINED -> {
                 createOffer(mPeerConnection!!, object : CreateOfferCallback {
                     override fun onCreateOfferSuccess(sdp: SessionDescription) {
@@ -239,16 +243,19 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                     }
 
                 })
-                val publishers = msg.getJSONArray("publishers")
+                val publishers = msg.getJSONArray(JanusJsonKey.PUBLISHERS.canonicalForm())
                 handleNewPublishers(publishers)
             }
 
             JanusMsgType.EVENT -> {
-                if (msg.has("configured") && msg.getString("configured") == "ok" && jsep != null) {
+                if (msg.has(JanusJsonKey.CONFIGURED.canonicalForm()) &&
+                    msg.getString(JanusJsonKey.CONFIGURED.canonicalForm()) == "ok" && jsep != null
+                ) {
                     // sdp 协商成功，收到网关发来的 sdp answer
-                    val sdp = jsep.getString("sdp")
+                    val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
                     mPeerConnection!!.setRemoteDescription(object : SdpObserver {
                         override fun onCreateSuccess(sdp: SessionDescription) {
+
                         }
 
                         override fun onSetSuccess() {
@@ -265,16 +272,34 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                         }
 
                         override fun onCreateFailure(error: String) {
+
                         }
 
                         override fun onSetFailure(error: String) {
+
                         }
                     }, SessionDescription(SessionDescription.Type.ANSWER, sdp))
-                } else if (msg.has("unpublished")) {
-                    val unPublishdUserId = msg.getLong("unpublished")
-                } else if (msg.has("leaving")) {
+                } else if (msg.has(JanusJsonKey.UNPUBLISHED.canonicalForm())) {
+                    val unPublishedUserId =
+                        BigInteger(msg.getString(JanusJsonKey.UNPUBLISHED.canonicalForm()))
+                    LogUtil.i(unPublishedUserId)
+                    room.removePublisherById(unPublishedUserId)
+                    launchMain {
+                        val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
+                        var index = 0
+                        while (it.hasNext()) {
+                            val next = it.next()
+                            if (unPublishedUserId == next.userId) {
+                                it.remove()
+                                adapter!!.notifyItemRemoved(index)
+                            }
+                            index++
+                        }
+                    }
+                } else if (msg.has(JanusJsonKey.LEAVING.canonicalForm())) {
                     // 离开
-                    val leavingUserId = BigInteger(msg.getString("leaving"))
+                    val leavingUserId =
+                        BigInteger(msg.getString(JanusJsonKey.LEAVING.canonicalForm()))
                     room.removePublisherById(leavingUserId)
                     launchMain {
                         val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
@@ -288,11 +313,13 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                             index++
                         }
                     }
-                } else if (msg.has("publishers")) {
+                } else if (msg.has(JanusJsonKey.PUBLISHERS.canonicalForm())) {
                     // 新用户开始发布
-                    val publishers = msg.getJSONArray("publishers")
+                    val publishers = msg.getJSONArray(JanusJsonKey.PUBLISHERS.canonicalForm())
                     handleNewPublishers(publishers)
-                } else if (msg.has("started") && msg.getString("started") == "ok") {
+                } else if (msg.has(JanusJsonKey.STARTED.canonicalForm()) &&
+                    msg.getString(JanusJsonKey.STARTED.canonicalForm()) == "ok"
+                ) {
                     // 订阅 start 成功
                     LogUtil.i("订阅 start 成功")
                 }
@@ -303,16 +330,16 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                     return
                 }
                 // attach 到了一个Publisher 上,会收到网关转发来的sdp offer
-                val sdp = jsep.getString("sdp")
-                val feedId = BigInteger(msg.getString("id"))
-                val display = msg.getString("display")
+                val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
+                val feedId = BigInteger(msg.getString(JanusJsonKey.ID.canonicalForm()))
+                val display = msg.getString(JanusJsonKey.DISPLAY.canonicalForm())
                 val publisher = room.findPublisherById(feedId)
 
                 // 添加用户到界面
                 val videoItem = addNewVideoItem(feedId, display)
                 launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
 
-                val peerConnection = PeerConnectionUtil.createPeerConnection(
+                val peerConnection = createPeerConnection(
                     peerConnectionFactory,
                     object : CreatePeerConnectionCallback {
                         override fun onIceGatheringComplete() {
