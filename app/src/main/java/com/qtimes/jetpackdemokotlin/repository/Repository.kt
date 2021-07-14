@@ -106,28 +106,39 @@ class UserRepository(
         appDatabase.getUserDao().findUserByAccountOrPhone(param)
 }
 
+/**
+ * 施工设备绑定相关Repository
+ */
+
 class DeviceMapRepository(iUIActionEvent: IUIActionEvent, private val appDatabase: AppDatabase) :
     BaseRepository(iUIActionEvent) {
 
     /**
      * 添加设备与位置的绑定关系
-     *//*
+     */
     suspend fun addDeviceMap(deviceMap: DeviceMap): Long {
         return appDatabase.getDeviceMapDao().add(deviceMap)
     }
 
-    *//**
+    /**
      * 查找绑定关系
-     *//*
-    suspend fun findDeviceMap(did: String, lid: String): LiveData<DeviceMap> {
+     */
+    fun findDeviceMap(did: String, lid: String): DeviceMap? {
         return appDatabase.getDeviceMapDao().findByDidOrLid(did, lid)
     }
 
-    *//**
+    /**
+     * 查找绑定关系
+     */
+    fun findDeviceMap(param: String?):DeviceMap? {
+        return appDatabase.getDeviceMapDao().findByDidOrLid(param)
+    }
+
+    /**
      * 查找所有绑定关系
-     *//*
-    suspend fun findAll(): List<DeviceMap> {
+     */
+    fun findAll(): List<DeviceMap> {
         return appDatabase.getDeviceMapDao().findAll()
-    }*/
+    }
 }
 

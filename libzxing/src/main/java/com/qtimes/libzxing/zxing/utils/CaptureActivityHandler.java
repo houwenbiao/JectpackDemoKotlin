@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.google.zxing.Result;
 import com.qtimes.libzxing.R;
@@ -36,6 +37,7 @@ import com.qtimes.libzxing.zxing.decode.DecodeThread;
  */
 public class CaptureActivityHandler extends Handler {
 
+    private static final String TAG = "CaptureActivityHandler";
     private final CaptureActivity activity;
     private final DecodeThread decodeThread;
     private final CameraManager cameraManager;
@@ -55,15 +57,17 @@ public class CaptureActivityHandler extends Handler {
 
     @Override
     public void handleMessage(Message message) {
+
+
         if (message.what == R.id.restart_preview) {
             restartPreviewAndDecode();
 
         } else if (message.what == R.id.decode_succeeded) {
             state = State.SUCCESS;
             Bundle bundle = message.getData();
-
-            activity.handleDecode((Result) message.obj, bundle);
-
+            Result result = (Result) message.obj;
+            Log.d(TAG, result.getBarcodeFormat().name());
+            activity.handleDecode(result, bundle);
         } else if (message.what == R.id.decode_failed) {// We're decoding as fast as possible, so when one
             // decode fails,
             // start another.

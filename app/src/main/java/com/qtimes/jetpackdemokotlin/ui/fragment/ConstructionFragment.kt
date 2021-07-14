@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.view.View
+import com.google.zxing.BarcodeFormat
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.databinding.FragmentConstructionBinding
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
@@ -66,6 +67,28 @@ class ConstructionFragment : BaseFragment() {
             val qrCodeBitmap = CreateQRBitmp.createQRCodeBitmap(contentString, portrait)
             binding.ivQrImage.setImageBitmap(qrCodeBitmap)
         }
+
+        binding.btnAddRecord.setOnClickListener {
+            launchMain {
+                val temp = constructionViewModel.addDeviceMap()
+                if (temp != -1L) {
+                    showToast("添加记录成功！")
+                    constructionViewModel.barCodeValue.postValue("")
+                    constructionViewModel.qrCodeValue.postValue("")
+                }
+            }
+        }
+    }
+
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_construction
+    }
+
+    override fun bindingSetViewModels() {
+        super.bindingSetViewModels()
+        binding = viewDataBinding as FragmentConstructionBinding
+        binding.constructionVM = constructionViewModel
+        constructionViewModel.owner = mLifecycleOwner
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -97,29 +120,30 @@ class ConstructionFragment : BaseFragment() {
 
             SCAN_REQUEST_CODE_BAR -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    val input: String? = data?.getStringExtra("result")
-                    constructionViewModel.barCodeValue.postValue(input)
-                    showToast("条形码扫描结果:$input")
+                    val codeFormat: String? = data?.getStringExtra("codeFormat")
+                    if (codeFormat != null && codeFormat == BarcodeFormat.CODE_128.name) {
+                        val input: String? = data.getStringExtra("result")
+                        constructionViewModel.barCodeValue.postValue(input)
+                        constructionViewModel.findDeviceMap(input)
+                    } else {
+                        showToast(getString(R.string.please_scan_exact_bar_code))
+                    }
                 }
             }
 
             SCAN_REQUEST_CODE_QR -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    val input: String? = data?.getStringExtra("result")
-                    constructionViewModel.qrCodeValue.postValue(input)
-                    showToast("二维码扫描结果:$input")
+                    val codeFormat: String? = data?.getStringExtra("codeFormat")
+                    if (codeFormat != null && codeFormat == BarcodeFormat.QR_CODE.name) {
+                        val input: String? = data.getStringExtra("result")
+                        constructionViewModel.qrCodeValue.postValue(input)
+                        constructionViewModel.findDeviceMap(input)
+                    } else {
+                        showToast(getString(R.string.please_scan_exact_qr_code))
+                    }
                 }
             }
+
         }
-    }
-
-    override fun getLayoutId(): Int {
-        return R.layout.fragment_construction
-    }
-
-    override fun bindingSetViewModels() {
-        super.bindingSetViewModels()
-        binding = viewDataBinding as FragmentConstructionBinding
-        binding.constructionVM = constructionViewModel
     }
 }

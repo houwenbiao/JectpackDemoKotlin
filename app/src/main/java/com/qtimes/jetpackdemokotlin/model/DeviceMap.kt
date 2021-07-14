@@ -16,13 +16,13 @@ import androidx.room.PrimaryKey
     indices = [Index(
         value = ["device_id", "location_id"],
         unique = true
-    ), Index(value = ["device_id"], unique = true), Index(value = ["location_id"], unique = true)]
+    )]
 )
 data class DeviceMap(
-    @ColumnInfo(name = "device_id") val deviceId: String,
-    @ColumnInfo(name = "location_id") val locationId: String
+    @ColumnInfo(name = "device_id") var deviceId: String,
+    @ColumnInfo(name = "location_id") var locationId: String
 ) {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
-    val id: Long = 0
+    var id: Long = 0L
 }

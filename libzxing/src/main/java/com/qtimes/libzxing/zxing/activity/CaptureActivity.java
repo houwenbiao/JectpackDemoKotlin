@@ -188,6 +188,7 @@ public final class CaptureActivity extends AppCompatActivity implements SurfaceH
         bundle.putInt("width", mCropRect.width());
         bundle.putInt("height", mCropRect.height());
         bundle.putString("result", rawResult.getText());
+        bundle.putString("codeFormat", rawResult.getBarcodeFormat().name());
         resultIntent.putExtras(bundle);
         this.setResult(RESULT_OK, resultIntent);
         CaptureActivity.this.finish();

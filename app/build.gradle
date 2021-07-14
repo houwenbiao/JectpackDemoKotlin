@@ -7,25 +7,21 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
         applicationId "com.qtimes.jectpackdemokotlin"
-        minSdkVersion 24
-        targetSdkVersion 30
-        versionCode 21040611
-        versionName "1.0.0"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
-        dataBinding true
-    }
-
-    viewBinding {
-        enabled = true
+        dataBinding = true
+        viewBinding = true
     }
 
     buildTypes {

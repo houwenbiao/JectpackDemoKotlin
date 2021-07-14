@@ -14,15 +14,18 @@ import com.qtimes.jetpackdemokotlin.model.DeviceMap
 @Dao
 interface DeviceMapDao {
 
-    /*@Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(deviceMap: DeviceMap): Long
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(deviceMap: DeviceMap): Int
 
     @Query("select * from device_map where device_id =:did or location_id =:lid")
-    suspend fun findByDidOrLid(did: String, lid: String): LiveData<DeviceMap>
+    fun findByDidOrLid(did: String, lid: String): DeviceMap?
+
+    @Query("select * from device_map where device_id =:param or location_id =:param")
+    fun findByDidOrLid(param: String?): DeviceMap?
 
     @Query("select * from device_map")
-    suspend fun findAll(): List<DeviceMap>*/
+    fun findAll(): List<DeviceMap>
 }

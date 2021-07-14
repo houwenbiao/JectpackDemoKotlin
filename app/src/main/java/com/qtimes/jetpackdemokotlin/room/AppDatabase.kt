@@ -21,7 +21,7 @@ import com.qtimes.jetpackdemokotlin.room.dao.DeviceMapDao
 import com.qtimes.jetpackdemokotlin.room.dao.UserDao
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 
-@Database(entities = [User::class], version = 2, exportSchema = false)
+@Database(entities = [User::class, DeviceMap::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getUserDao(): UserDao
@@ -60,7 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
                 ctx.packageName
             )
                 .allowMainThreadQueries()
-                .addMigrations(MIGRATION_1_2)
+//                .addMigrations(MIGRATION_1_2)
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)

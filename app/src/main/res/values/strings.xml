@@ -71,5 +71,10 @@
     <string name="cancel">取消</string>
     <string name="save_pic">保存图片</string>
     <string name="scanning_qr_code">点击扫描二维码</string>
+    <string name="illegable_code">非法条形码数据</string>
+    <string name="add_code_failed">添加失败, 数据已存在</string>
+    <string name="code_exist">此条码/二维码已存在</string>
+    <string name="please_scan_exact_bar_code">请扫描正确的条形码</string>
+    <string name="please_scan_exact_qr_code">请扫描正确的二维码</string>
 
 </resources>
