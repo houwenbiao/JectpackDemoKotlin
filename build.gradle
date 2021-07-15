@@ -6,7 +6,6 @@ buildscript {
         targetSdkVersion = 30
         versionCode = 21040611
         versionName = "1.0.0"
-
         annotationVersion = "1.1.0"
         appcompatVersion = "1.2.0"//目前稳定版本为1.2.0更新到1.3beta版本会出现Navigation切换闪屏问题
         constraintlayoutVersion = "2.0.4"
@@ -27,7 +26,7 @@ buildscript {
         multidexVersion = "1.0.0"
         navigationVersion = "2.3.2"
         okhttpVersion = "4.9.0"
-        pagingVersion = "3.0.0-beta03"
+        pagingVersion = "3.0.0"
         preferenceVersion = "1.1.1"
         recyclerviewVersion = "1.2.1"
         retrofitVersion = "2.9.0"

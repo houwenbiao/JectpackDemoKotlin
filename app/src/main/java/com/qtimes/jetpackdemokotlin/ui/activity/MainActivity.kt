@@ -45,14 +45,13 @@ class MainActivity : BaseActivity() {
             android.Manifest.permission.CAMERA,
             android.Manifest.permission.READ_EXTERNAL_STORAGE
         ).subscribe {
-            if (it) {
-                showToast(getString(R.string.get_permission_success))
-            } else {
+            if (!it) {
                 showToast(getString(R.string.get_permission_failed))
             }
         }
         val fragmentManager = supportFragmentManager
-        val navHostFragment = fragmentManager.findFragmentById(R.id.main_fragment) as NavHostFragment?
+        val navHostFragment =
+            fragmentManager.findFragmentById(R.id.main_fragment) as NavHostFragment?
         navHostFragment?.let {
             mNavController = it.navController
             binding.bottomNavView.setupWithNavController(it.navController)

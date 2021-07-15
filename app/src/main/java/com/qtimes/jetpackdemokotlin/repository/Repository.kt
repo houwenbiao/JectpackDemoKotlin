@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import com.qtimes.jetpackdemokotlin.model.*
 import com.qtimes.jetpackdemokotlin.net.base.IUIActionEvent
 import com.qtimes.jetpackdemokotlin.net.base.RequestCallback
@@ -130,14 +131,14 @@ class DeviceMapRepository(iUIActionEvent: IUIActionEvent, private val appDatabas
     /**
      * 查找绑定关系
      */
-    fun findDeviceMap(param: String?):DeviceMap? {
+    fun findDeviceMap(param: String?): DeviceMap? {
         return appDatabase.getDeviceMapDao().findByDidOrLid(param)
     }
 
     /**
      * 查找所有绑定关系
      */
-    fun findAll(): List<DeviceMap> {
+    fun findAll(): PagingSource<Int, DeviceMap> {
         return appDatabase.getDeviceMapDao().findAll()
     }
 }

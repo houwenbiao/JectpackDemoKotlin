@@ -9,21 +9,26 @@ package com.qtimes.jetpackdemokotlin.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.model.DeviceMap
 import com.qtimes.jetpackdemokotlin.repository.DeviceMapRepository
 import com.qtimes.jetpackdemokotlin.room.AppDatabase
-import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.base.BaseViewModel
-import java.security.acl.Owner
+import kotlinx.coroutines.flow.Flow
 
 class ConstructionViewModel : BaseViewModel() {
     private val deviceMapRepository = DeviceMapRepository(this, AppDatabase.getInstance())
     lateinit var owner: LifecycleOwner
 
-    val barCodeValue = MutableLiveData("")//条形码值
-    val qrCodeValue = MutableLiveData("")//二维码值
+    var barCodeValue = MutableLiveData("")//条形码值
+    var qrCodeValue = MutableLiveData("")//二维码值
+    var generateQrCodeValue = MutableLiveData("")//用于生成二维码的输入值
 
 
     suspend fun addDeviceMap(): Long {
@@ -56,5 +61,11 @@ class ConstructionViewModel : BaseViewModel() {
     fun findDeviceMap(param: String?) {
         val deviceMap = deviceMapRepository.findDeviceMap(param)
         if (deviceMap != null) showToast(MainApplication.context.getString(R.string.code_exist))
+    }
+
+    fun findAll(): Flow<PagingData<DeviceMap>> {
+        return Pager(PagingConfig(pageSize = 10)) {
+            deviceMapRepository.findAll()
+        }.flow.cachedIn(viewModelScope)
     }
 }

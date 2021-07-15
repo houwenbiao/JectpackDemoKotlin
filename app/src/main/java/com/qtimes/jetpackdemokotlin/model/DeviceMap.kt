@@ -16,6 +16,12 @@ import androidx.room.PrimaryKey
     indices = [Index(
         value = ["device_id", "location_id"],
         unique = true
+    ), Index(
+        value = ["device_id"],
+        unique = true
+    ), Index(
+        value = ["location_id"],
+        unique = true
     )]
 )
 data class DeviceMap(

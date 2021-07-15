@@ -78,6 +78,10 @@ class ConstructionFragment : BaseFragment() {
                 }
             }
         }
+
+        binding.btnQueryRecordList.setOnClickListener {
+            mNavController.navigate(ConstructionFragmentDirections.actionConstructionFragmentToDeviceMapListFragment())
+        }
     }
 
     override fun getLayoutId(): Int {
@@ -113,8 +117,8 @@ class ConstructionFragment : BaseFragment() {
                                 showToast("从图库选择的图片不是二维码图片")
                             }
                         }
-                        it1.close()
                     }
+                    cursor?.close()
                 }
             }
 
@@ -125,6 +129,7 @@ class ConstructionFragment : BaseFragment() {
                         val input: String? = data.getStringExtra("result")
                         constructionViewModel.barCodeValue.postValue(input)
                         constructionViewModel.findDeviceMap(input)
+                        constructionViewModel.generateQrCodeValue.postValue(input)
                     } else {
                         showToast(getString(R.string.please_scan_exact_bar_code))
                     }
@@ -143,7 +148,6 @@ class ConstructionFragment : BaseFragment() {
                     }
                 }
             }
-
         }
     }
 }

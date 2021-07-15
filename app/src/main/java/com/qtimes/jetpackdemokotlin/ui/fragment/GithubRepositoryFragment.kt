@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.databinding.FragmentGithubRepositoryBinding
 import com.qtimes.jetpackdemokotlin.paging.adapter.FooterAdapter
-import com.qtimes.jetpackdemokotlin.paging.adapter.RepositoryAdapter
+import com.qtimes.jetpackdemokotlin.paging.adapter.GithubRepositoryAdapter
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.viewmodel.ArticleViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -27,7 +27,7 @@ class GithubRepositoryFragment : BaseFragment() {
 
     lateinit var binding: FragmentGithubRepositoryBinding
     private val articleViewModel by getViewModel(ArticleViewModel::class.java)
-    private val repositoryAdapter = RepositoryAdapter()
+    private val repositoryAdapter = GithubRepositoryAdapter()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

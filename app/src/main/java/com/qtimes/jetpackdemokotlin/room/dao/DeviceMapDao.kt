@@ -7,7 +7,7 @@
 
 package com.qtimes.jetpackdemokotlin.room.dao
 
-import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
 import androidx.room.*
 import com.qtimes.jetpackdemokotlin.model.DeviceMap
 
@@ -26,6 +26,6 @@ interface DeviceMapDao {
     @Query("select * from device_map where device_id =:param or location_id =:param")
     fun findByDidOrLid(param: String?): DeviceMap?
 
-    @Query("select * from device_map")
-    fun findAll(): List<DeviceMap>
+    @Query("select * from device_map order by location_id")
+    fun findAll(): PagingSource<Int, DeviceMap>
 }

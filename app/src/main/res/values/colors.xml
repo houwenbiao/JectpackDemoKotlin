@@ -5,6 +5,8 @@
     <color name="txt_welcome_title">#A1000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="device_map_item_border">#60000000</color>
+
     <color name="theme_color">#04BD8F</color><!--主体颜色-->
 
     <color name="authenticate_btn_text">#0099FF</color>

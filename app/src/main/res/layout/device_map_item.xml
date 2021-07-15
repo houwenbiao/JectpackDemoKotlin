@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/x20">
+
+    <TextView
+        android:paddingStart="@dimen/x20"
+        android:id="@+id/title_short_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/short_address"
+        android:textSize="@dimen/x25"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/short_address_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/x40"
+        android:textSize="@dimen/x25"
+        app:layout_constraintCircleRadius="@dimen/x40"
+        app:layout_constraintLeft_toRightOf="@id/title_short_address"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        app:layout_constraintLeft_toRightOf="@id/short_address_value"
+        android:id="@+id/title_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/location"
+        android:textSize="@dimen/x25"
+        android:layout_marginLeft="@dimen/x100"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/location_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/x40"
+        android:textSize="@dimen/x25"
+        app:layout_constraintCircleRadius="@dimen/x40"
+        app:layout_constraintLeft_toRightOf="@id/title_location"
+        android:paddingBottom="@dimen/x20"
+        tools:ignore="MissingConstraints" />
+
+    <LinearLayout
+        android:background="@color/device_map_item_border"
+        app:layout_constraintTop_toBottomOf="@id/location_value"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y1">
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

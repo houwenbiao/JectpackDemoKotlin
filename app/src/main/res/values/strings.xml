@@ -38,6 +38,7 @@
     <string name="title_door_list">门类型</string>
     <string name="title_camera_type">摄像头类型</string>
     <string name="title_atc_info">设备激活信息</string>
+    <string name="title_dev_list">设备绑定列表</string>
 
     <string name="activate_version">激活版本</string>
     <string name="model_version_info">激活版本信息</string>
@@ -76,5 +77,7 @@
     <string name="code_exist">此条码/二维码已存在</string>
     <string name="please_scan_exact_bar_code">请扫描正确的条形码</string>
     <string name="please_scan_exact_qr_code">请扫描正确的二维码</string>
+    <string name="short_address">短地址:</string>
+    <string name="location">位置: </string>
 
 </resources>
