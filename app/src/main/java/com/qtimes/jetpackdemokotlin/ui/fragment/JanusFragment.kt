@@ -28,6 +28,11 @@ class JanusFragment : BaseFragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+//        mNavController.navigate(JanusFragmentDirections.actionJanusFragmentToVideoCallFragment())
+    }
+
     override fun getLayoutId(): Int {
         return R.layout.fragment_janus
     }

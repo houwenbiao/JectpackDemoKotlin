@@ -47,7 +47,7 @@ class WebSocketChannel {
      */
     fun sendMessage(msg: String) {
         if (connected) {
-            LogUtil.d("WS send msg------>: $msg")
+            LogUtil.d("++++++++++WebSocket send msg++++++++ \n $msg")
             webSocket.send(msg)
         } else {
             LogUtil.e("Send message failed socket not connected")
@@ -85,9 +85,10 @@ class WebSocketChannel {
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            LogUtil.d("onFailure response: $response")
+            LogUtil.d("WebSocketHandler onFailure response: $response, Throwable: ${t.message}")
             connected = false
-            webSocketCallback.onClosed()
+            webSocketCallback.onFailure(response)
+//            webSocketCallback.onClosed()
         }
     }
 
@@ -95,6 +96,7 @@ class WebSocketChannel {
     interface WebSocketCallback {
         fun onOpen()
         fun onMessage(txt: String)
+        fun onFailure(response: Response?)
         fun onClosed()
     }
 }

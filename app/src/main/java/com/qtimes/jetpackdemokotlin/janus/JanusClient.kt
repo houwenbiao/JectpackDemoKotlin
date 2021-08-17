@@ -11,14 +11,14 @@
 package com.qtimes.jetpackdemokotlin.janus
 
 import android.content.Context
+import android.widget.Toast
+import com.qtimes.jetpackdemokotlin.common.MainApplication
 import com.qtimes.jetpackdemokotlin.model.JanusMsgType
 import com.qtimes.jetpackdemokotlin.model.PluginHandle
 import com.qtimes.jetpackdemokotlin.model.Transaction
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import okhttp3.Response
 import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
@@ -315,7 +315,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
     }
 
     /**
-     * 加入房间
+     * VideoRoom JoinRoom
      */
     fun joinRoom(handleId: BigInteger?, roomId: Int, displayName: String?) {
         val message = JSONObject()
@@ -357,6 +357,51 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
     }
 
     /**
+     * VideoCall make call
+     */
+    fun makeCall(handleId: BigInteger?, sdp: SessionDescription, name: String) {
+        val message = JSONObject()
+        val body = JSONObject()
+        try {
+            body.putOpt("request", "call")
+            body.putOpt("username", name)
+            val jsep = JSONObject()
+            jsep.putOpt("type", sdp.type.canonicalForm())
+            jsep.putOpt("sdp", sdp.description)
+            message.put("body", body)
+            message.putOpt("jsep", jsep)
+            message.putOpt("janus", "message")
+            message.putOpt("transaction", randomString(12))
+            message.putOpt("session_id", sessionId)
+            message.putOpt("handle_id", handleId)
+
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        webSocketChannel.sendMessage(message.toString())
+    }
+
+    /**
+     * VideoCall get user list
+     */
+    fun list(handleId: BigInteger) {
+        val message = JSONObject()
+        val body = JSONObject()
+        try {
+            body.putOpt("request", "list")
+            message.put("body", body)
+            message.putOpt("janus", "message")
+            message.putOpt("transaction", randomString(12))
+            message.putOpt("session_id", sessionId)
+            message.putOpt("handle_id", handleId)
+
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        webSocketChannel.sendMessage(message.toString())
+    }
+
+    /**
      * 接收邀请
      */
     fun accept(handleId: BigInteger, sdp: SessionDescription) {
@@ -380,7 +425,6 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
         webSocketChannel.sendMessage(message.toString())
     }
 
-
     /**
      * 连接打开
      */
@@ -394,7 +438,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
      */
     @ExperimentalStdlibApi
     override fun onMessage(message: String) {
-        LogUtil.d("Received message >>>>>>>>>> $message")
+        LogUtil.d(">>>>>>>>>> WebSocket received msg <<<<<<<<< \n $message")
         try {
             val obj = JSONObject(message)
             val type: JanusMsgType = JanusMsgType.fromString(obj.getString("janus"))
@@ -410,7 +454,7 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
             if (sender != null) {
                 handle = attachedPlugins[sender]
             }
-            LogUtil.d("Received message type=$type transaction = $transaction, sender = $sender")
+//            LogUtil.d("Received message type=$type transaction = $transaction, sender = $sender")
             when (type) {
                 JanusMsgType.KEEPALIVE -> {
                 }
@@ -499,13 +543,19 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                     janusCallback!!.onDestroySession(sessionId)
                 }
                 else -> {
-                    LogUtil.d(message)
+                    LogUtil.d("Other msg: $message")
                 }
             }
         } catch (e: JSONException) {
             if (janusCallback != null) {
                 janusCallback!!.onError(e.message)
             }
+        }
+    }
+
+    override fun onFailure(response: Response?) {
+        GlobalScope.launch(Dispatchers.Main) {
+            Toast.makeText(MainApplication.context, "连接失败！", Toast.LENGTH_LONG).show()
         }
     }
 

@@ -42,28 +42,31 @@ class PeerConnectionUtil {
                 iceServerList,
                 object : PeerConnection.Observer {
                     override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
-                        LogUtil.d("onSignalingChange")
+                        LogUtil.d("=========onSignalingChange===========$p0")
                     }
 
                     override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
-                        LogUtil.d("onIceConnectionChange")
+                        LogUtil.d("=========onIceConnectionChange=========$p0")
                     }
 
                     override fun onIceConnectionReceivingChange(p0: Boolean) {
-                        LogUtil.d("onIceConnectionReceivingChange")
+                        LogUtil.d("=========onIceConnectionReceivingChange=========$p0")
                     }
 
                     override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState) {
+                        LogUtil.d("=========onIceGatheringChange=========$p0")
                         if (PeerConnection.IceConnectionState.COMPLETED.name == p0.name) {
                             callback?.onIceGatheringComplete()
                         }
                     }
 
                     override fun onIceCandidate(p0: IceCandidate) {
+                        LogUtil.d("=========onIceCandidate=========$p0")
                         callback?.onIceCandidate(p0)
                     }
 
                     override fun onIceCandidatesRemoved(p0: Array<IceCandidate?>) {
+                        LogUtil.d("=========onIceCandidatesRemoved=========$p0")
                         callback?.onIceCandidatesRemoved(p0)
                     }
 
@@ -76,15 +79,15 @@ class PeerConnectionUtil {
                     }
 
                     override fun onDataChannel(p0: DataChannel) {
-                        LogUtil.d("onDataChannel")
+                        LogUtil.d("=========onDataChannel=========")
                     }
 
                     override fun onRenegotiationNeeded() {
-                        LogUtil.d("onRenegotiationNeeded")
+                        LogUtil.d("=========onRenegotiationNeeded=========")
                     }
 
                     override fun onAddTrack(p0: RtpReceiver, p1: Array<out MediaStream>) {
-                        LogUtil.d("onAddTrack")
+                        LogUtil.d("=========onAddTrack=========")
                     }
                 })
         }
@@ -180,8 +183,6 @@ class PeerConnectionUtil {
 
                         }
                     }, sdp)
-
-//
                     callback?.onCreateOfferSuccess(sdp)
                 }
 

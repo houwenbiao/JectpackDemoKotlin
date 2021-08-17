@@ -32,6 +32,7 @@ object DimenUtil {
         makeString(600, 1024)
         makeString(1080, 1920)
         makeString(1080, 2400)
+        makeString(1200, 1776)
         makeString(1440, 2392)
         makeString(1440, 2560)
     }
