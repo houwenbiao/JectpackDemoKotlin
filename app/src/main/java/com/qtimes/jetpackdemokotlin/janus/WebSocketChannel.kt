@@ -69,7 +69,7 @@ class WebSocketChannel {
     private inner class WebSocketHandler : WebSocketListener() {
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            LogUtil.d("onOpen")
+            LogUtil.i("WebSocketHandler onOpen")
             connected = true
             webSocketCallback.onOpen()
         }
@@ -79,16 +79,15 @@ class WebSocketChannel {
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            LogUtil.d("onClosed $reason")
+            LogUtil.e("WebSocketHandler onClosed reason: $reason, code: $code")
             connected = false
             webSocketCallback.onClosed()
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            LogUtil.d("WebSocketHandler onFailure response: $response, Throwable: ${t.message}")
+            LogUtil.e("WebSocketHandler onFailure response: $response, Throwable: ${t.message}")
             connected = false
             webSocketCallback.onFailure(response)
-//            webSocketCallback.onClosed()
         }
     }
 

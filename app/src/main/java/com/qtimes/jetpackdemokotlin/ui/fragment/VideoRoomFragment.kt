@@ -62,6 +62,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
 
     private var videoItemList: MutableList<JanusVideoItem> = arrayListOf()
     private var adapter: VideoItemAdapter? = null
+    private var currentFeedId = BigInteger("0")
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,15 +82,30 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
         videoCapturer?.let {
             videoSource = peerConnectionFactory.createVideoSource(it.isScreencast)
             it.initialize(surfaceTextureHelper, mContext, videoSource!!.capturerObserver)
-            it.startCapture(
-                Const.VIEW_HEIGHT_DEFAULT,
-                Const.VIEW_WIDTH_DEFAULT,
-                Const.VIDEO_FPS_DEFAULT
-            )
         }
         videoTrack = peerConnectionFactory.createVideoTrack("102", videoSource)
         janusClient.connect()
-        mPeerConnection = createPeerConnection(peerConnectionFactory, null)
+        mPeerConnection =
+            createPeerConnection(peerConnectionFactory, object : CreatePeerConnectionCallback {
+
+                override fun onIceGatheringComplete() {
+                    janusClient.trickleCandidateComplete(videoRoomHandlerId)
+                }
+
+                override fun onIceCandidate(candidate: IceCandidate) {
+                    janusClient.trickleCandidate(videoRoomHandlerId, candidate)
+                }
+
+                override fun onIceCandidatesRemoved(candidates: Array<IceCandidate?>) {}
+                override fun onAddStream(stream: MediaStream) {
+
+                }
+
+                override fun onRemoveStream(stream: MediaStream) {
+
+                }
+
+            })
         mPeerConnection?.addTrack(audioTrack)
         mPeerConnection?.addTrack(videoTrack)
         adapter = VideoItemAdapter()
@@ -98,6 +114,15 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_videoroom
+    }
+
+    override fun onResume() {
+        super.onResume()
+        videoCapturer?.startCapture(
+            Const.VIEW_HEIGHT_DEFAULT,
+            Const.VIEW_WIDTH_DEFAULT,
+            Const.VIDEO_FPS_DEFAULT
+        )
     }
 
     override fun bindingSetViewModels() {
@@ -202,6 +227,12 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
         LogUtil.d("onJanusAttached: ${Thread.currentThread().name}")
         launchMain {
             janusClient.joinRoom(handleId, room.id, videoRoomViewModel.userName.value)
+            val videoItem: JanusVideoItem =
+                addNewVideoItem(null, videoRoomViewModel.userName.value)
+            videoItem.peerConnection = mPeerConnection!!
+            videoItem.videoTrack = videoTrack!!
+            LogUtil.d("videoItem: ${videoItem.videoTrack}, videoTrack: $videoTrack")
+            adapter!!.notifyItemInserted(videoItemList.size - 1)
         }
     }
 
@@ -259,16 +290,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                         }
 
                         override fun onSetSuccess() {
-                            launchMain {
-                                LogUtil.d("videoCapturer: $videoCapturer")
-                                videoCapturer!!.startCapture(1920, 1080, 30)
-                                val videoItem: JanusVideoItem =
-                                    addNewVideoItem(null, videoRoomViewModel.userName.value)
-                                videoItem.peerConnection = mPeerConnection!!
-                                videoItem.videoTrack = videoTrack!!
-                                LogUtil.d("videoItem: ${videoItem.videoTrack}, videoTrack: $videoTrack")
-                                adapter!!.notifyItemInserted(videoItemList.size - 1)
-                            }
+
                         }
 
                         override fun onCreateFailure(error: String) {
@@ -332,11 +354,12 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                 // attach 到了一个Publisher 上,会收到网关转发来的sdp offer
                 val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
                 val feedId = BigInteger(msg.getString(JanusJsonKey.ID.canonicalForm()))
+                currentFeedId = feedId
                 val display = msg.getString(JanusJsonKey.DISPLAY.canonicalForm())
                 val publisher = room.findPublisherById(feedId)
 
                 // 添加用户到界面
-                val videoItem = addNewVideoItem(feedId, display)
+                val videoItemRemote = addNewVideoItem(feedId, display)
                 launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
 
                 val peerConnection = createPeerConnection(
@@ -354,7 +377,7 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
                         override fun onAddStream(stream: MediaStream) {
                             if (stream.videoTracks.size > 0) {
                                 launchMain {
-                                    videoItem.videoTrack = stream.videoTracks[0]
+                                    videoItemRemote.videoTrack = stream.videoTracks[0]
                                     adapter!!.notifyDataSetChanged()
                                 }
                             }
@@ -364,8 +387,8 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
 
                         }
                     })
-                videoItem.peerConnection = peerConnection!!
-                peerConnection.setRemoteDescription(object : SdpObserver {
+                videoItemRemote?.peerConnection = peerConnection
+                peerConnection?.setRemoteDescription(object : SdpObserver {
                     override fun onCreateSuccess(sdp: SessionDescription) {
 
                     }
