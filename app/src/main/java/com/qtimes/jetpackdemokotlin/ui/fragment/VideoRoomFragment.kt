@@ -250,6 +250,11 @@ class VideoRoomFragment : BaseFragment(), JanusCallback {
 
     }
 
+    override fun onSlowLink(handleId: BigInteger?) {
+        janusClient.disconnect()
+        mNavController.navigateUp()
+    }
+
     @ExperimentalStdlibApi
     override fun onMessage(
         sender: BigInteger, handleId: BigInteger, msg: JSONObject?, jsep: JSONObject?

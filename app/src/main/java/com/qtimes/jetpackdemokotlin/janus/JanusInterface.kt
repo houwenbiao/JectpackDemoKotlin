@@ -50,6 +50,8 @@ interface JanusCallback {
 
     fun onHangup(handleId: BigInteger?)
 
+    fun onSlowLink(handleId: BigInteger?)
+
     fun onMessage(
         sender: BigInteger,
         handleId: BigInteger,

@@ -8,6 +8,8 @@
 package com.qtimes.jetpackdemokotlin.ui.activity
 
 import android.os.Bundle
+import android.view.Window
+import android.view.WindowManager
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.ui.base.BaseActivity
 import com.qtimes.jetpackdemokotlin.utils.ScreenUtil

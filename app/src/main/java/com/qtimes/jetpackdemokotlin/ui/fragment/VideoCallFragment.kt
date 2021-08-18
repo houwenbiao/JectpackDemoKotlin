@@ -26,6 +26,7 @@ import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItem
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItemHolder
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
+import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
 import java.math.BigInteger
@@ -157,6 +158,11 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         LogUtil.d("onHangup handleId: $handleId")
     }
 
+    override fun onSlowLink(handleId: BigInteger?) {
+        janusClient.disconnect()
+        mNavController.navigateUp()
+    }
+
     @ExperimentalStdlibApi
     override fun onMessage(
         sender: BigInteger, handleId: BigInteger, data: JSONObject?, jsep: JSONObject?
@@ -168,150 +174,163 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
             return
         }
 
-        val result: JSONObject = data.getJSONObject(JanusJsonKey.RESULT.canonicalForm()) ?: return
-
-        val event: String = result.getString(JanusJsonKey.EVENT.canonicalForm())
-
-        when (JanusMsgType.fromString(event)) {
-
-            JanusMsgType.REGISTERED -> {
-                janusClient.list(videoCallHandlerId)
-                makeCall()
-            }
-
-            JanusMsgType.CALLING -> {
-                LogUtil.d("calling--------")
-                launchMain {
-                    showToast("正在呼叫......")
-                    LogUtil.d("onSetSuccess videoCapturer: $videoCapturer")
-                    videoItemLocal = addNewVideoItem(null, videoRoomViewModel.userName.value)
-                    videoItemLocal?.peerConnection = mPeerConnection
-                    videoItemLocal?.videoTrack = videoTrack
-                    adapter!!.notifyItemInserted(videoItemList.size - 1)
-                }
-            }
-
-            JanusMsgType.UPDATE -> {
-                LogUtil.e("==========update=========")
-            }
-
-            JanusMsgType.ACCEPTED -> {
-                if (jsep != null) {
-                    val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
-                    // 添加远程用户到界面
-                    videoItemRemote = addNewVideoItem(
-                        videoCallHandlerId,
-                        result.getString(JanusJsonKey.USERNAME.canonicalForm())
-                    )
-                    launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
-                    videoItemRemote?.peerConnection = mPeerConnection
-                    mPeerConnection?.setRemoteDescription(
-                        object : SdpObserver {
-                            override fun onCreateSuccess(sdp: SessionDescription) {
-                                LogUtil.d("=====onCreateSuccess=====")
-                            }
-
-                            override fun onSetSuccess() {
-                                LogUtil.d("=====onSetSuccess=====")
-                            }
-
-                            override fun onCreateFailure(error: String) {
-                                LogUtil.d("=====onCreateFailure=====")
-                            }
-
-                            override fun onSetFailure(error: String) {
-                                LogUtil.d("=====onSetFailure=====")
-                            }
-                        }, SessionDescription(
-                            SessionDescription.Type.ANSWER, sdp
-                        )
-                    )
-                }
-            }
-
-            JanusMsgType.EVENT -> {
-                LogUtil.d("event-------")
-            }
-
-            JanusMsgType.INCOMINGCALL -> {
-                if (jsep != null) {
-                    val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
-                    // 添加用户到界面
-                    videoItemRemote = addNewVideoItem(
-                        null,
-                        result.getString(JanusJsonKey.USERNAME.canonicalForm())
-                    )
-                    launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
-
-                    videoItemRemote?.peerConnection = mPeerConnection
-                    mPeerConnection?.setRemoteDescription(
-                        object : SdpObserver {
-                            override fun onCreateSuccess(sdp: SessionDescription) {
-
-                            }
-
-                            override fun onSetSuccess() {
-                                launchMain {
-                                    LogUtil.d("videoCapturer: $videoCapturer")
-                                    videoItemLocal =
-                                        addNewVideoItem(null, videoRoomViewModel.userName.value)
-                                    videoItemLocal?.peerConnection = mPeerConnection
-                                    videoItemLocal?.videoTrack = videoTrack!!
-                                    LogUtil.d("videoItem: ${videoItemRemote?.videoTrack}, videoTrack: $videoTrack")
-                                    adapter!!.notifyItemInserted(videoItemList.size - 1)
-                                }
-
-                                PeerConnectionUtil.createAnswer(
-                                    mPeerConnection!!,
-                                    object : CreateAnswerCallback {
-                                        override fun onSetAnswerSuccess(sdp: SessionDescription) {
-                                            janusClient.accept(handleId, sdp)
-                                        }
-
-                                        override fun onSetAnswerFailed(error: String) {
-
-                                        }
-                                    })
-                            }
-
-                            override fun onCreateFailure(error: String) {
-
-                            }
-
-                            override fun onSetFailure(error: String) {
-
-                            }
-                        }, SessionDescription(
-                            SessionDescription.Type.OFFER, sdp
-                        )
-                    )
-                }
-            }
-
-            JanusMsgType.SLOW_LINK -> {
-                LogUtil.w("===========SLOW_LINK===========")
-                launchMain {
-                    showToast("网速慢......")
-                }
-            }
-
-            JanusMsgType.HANGUP -> {
-                launchMain {
-                    val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
-                    var index = 0
-                    while (it.hasNext()) {
-                        it.next()
-                        it.remove()
-                        adapter!!.notifyItemRemoved(index)
-                        index++
+        try {
+            val result: JSONObject? = data.getJSONObject(JanusJsonKey.RESULT.canonicalForm())
+            if (result != null) {
+                val event: String = result.getString(JanusJsonKey.EVENT.canonicalForm())
+                when (JanusMsgType.fromString(event)) {
+                    JanusMsgType.REGISTERED -> {
+                        janusClient.list(videoCallHandlerId)
+                        makeCall()
                     }
-                    janusClient.disconnect()
+
+                    JanusMsgType.CALLING -> {
+                        LogUtil.d("calling--------")
+                        launchMain {
+                            showToast("正在呼叫......")
+                            LogUtil.d("onSetSuccess videoCapturer: $videoCapturer")
+                            videoItemLocal =
+                                addNewVideoItem(null, videoRoomViewModel.userName.value)
+                            videoItemLocal?.peerConnection = mPeerConnection
+                            videoItemLocal?.videoTrack = videoTrack
+                            adapter!!.notifyItemInserted(videoItemList.size - 1)
+                        }
+                    }
+
+                    JanusMsgType.UPDATE -> {
+                        LogUtil.e("==========update=========")
+                    }
+
+                    JanusMsgType.ACCEPTED -> {
+                        if (jsep != null) {
+                            val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
+                            // 添加远程用户到界面
+                            videoItemRemote = addNewVideoItem(
+                                videoCallHandlerId,
+                                result.getString(JanusJsonKey.USERNAME.canonicalForm())
+                            )
+                            launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
+                            videoItemRemote?.peerConnection = mPeerConnection
+                            mPeerConnection?.setRemoteDescription(
+                                object : SdpObserver {
+                                    override fun onCreateSuccess(sdp: SessionDescription) {
+                                        LogUtil.d("=====onCreateSuccess=====")
+                                    }
+
+                                    override fun onSetSuccess() {
+                                        LogUtil.d("=====onSetSuccess=====")
+                                    }
+
+                                    override fun onCreateFailure(error: String) {
+                                        LogUtil.d("=====onCreateFailure=====")
+                                    }
+
+                                    override fun onSetFailure(error: String) {
+                                        LogUtil.d("=====onSetFailure=====")
+                                    }
+                                }, SessionDescription(
+                                    SessionDescription.Type.ANSWER, sdp
+                                )
+                            )
+                        }
+                    }
+
+                    JanusMsgType.EVENT -> {
+
+                    }
+
+                    JanusMsgType.INCOMINGCALL -> {
+                        if (jsep != null) {
+                            val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
+                            // 添加用户到界面
+                            videoItemRemote = addNewVideoItem(
+                                null,
+                                result.getString(JanusJsonKey.USERNAME.canonicalForm())
+                            )
+                            launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
+
+                            videoItemRemote?.peerConnection = mPeerConnection
+                            mPeerConnection?.setRemoteDescription(
+                                object : SdpObserver {
+                                    override fun onCreateSuccess(sdp: SessionDescription) {
+
+                                    }
+
+                                    override fun onSetSuccess() {
+                                        launchMain {
+                                            LogUtil.d("videoCapturer: $videoCapturer")
+                                            videoItemLocal =
+                                                addNewVideoItem(
+                                                    null,
+                                                    videoRoomViewModel.userName.value
+                                                )
+                                            videoItemLocal?.peerConnection = mPeerConnection
+                                            videoItemLocal?.videoTrack = videoTrack!!
+                                            LogUtil.d("videoItem: ${videoItemRemote?.videoTrack}, videoTrack: $videoTrack")
+                                            adapter!!.notifyItemInserted(videoItemList.size - 1)
+                                        }
+
+                                        PeerConnectionUtil.createAnswer(
+                                            mPeerConnection!!,
+                                            object : CreateAnswerCallback {
+                                                override fun onSetAnswerSuccess(sdp: SessionDescription) {
+                                                    janusClient.accept(handleId, sdp)
+                                                }
+
+                                                override fun onSetAnswerFailed(error: String) {
+
+                                                }
+                                            })
+                                    }
+
+                                    override fun onCreateFailure(error: String) {
+
+                                    }
+
+                                    override fun onSetFailure(error: String) {
+
+                                    }
+                                }, SessionDescription(
+                                    SessionDescription.Type.OFFER, sdp
+                                )
+                            )
+                        }
+                    }
+
+                    JanusMsgType.SLOW_LINK -> {
+                        LogUtil.w("===========SLOW_LINK===========")
+                        launchMain {
+                            showToast("网速慢......")
+                        }
+                    }
+
+                    JanusMsgType.HANGUP -> {
+                        launchMain {
+                            val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
+                            var index = 0
+                            while (it.hasNext()) {
+                                it.next()
+                                it.remove()
+                                adapter!!.notifyItemRemoved(index)
+                                index++
+                            }
+                            janusClient.disconnect()
+                        }
+                        mNavController.navigateUp()
+                    }
+
+                    else -> {
+
+                    }
                 }
-                mNavController.navigateUp()
             }
-
-            else -> {
-
+        } catch (e: JSONException) {
+            val error: String? = data.getString("error")
+            error?.let { err ->
+                launchMain {
+                    showToast(err)
+                    mNavController.navigateUp()
+                }
             }
         }
     }

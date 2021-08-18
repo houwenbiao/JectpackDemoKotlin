@@ -10,9 +10,7 @@ package com.qtimes.jetpackdemokotlin.ui.base
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -106,6 +104,11 @@ abstract class BaseActivity : AppCompatActivity(), IUIActionEventObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         super.onCreate(savedInstanceState)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)// 隐藏标题
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )//设置全屏
         ActivityMgr.addActivity(this)
         viewDataBinding = DataBindingUtil.setContentView(this, getLayoutId())
         mNavController = getNavController()

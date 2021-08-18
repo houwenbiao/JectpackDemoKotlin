@@ -64,6 +64,7 @@ enum class JanusMsgType {
     MEDIA,//开始或停止媒体流
     MESSAGE,
     REGISTERED,
+    SLOWLINK,//限流
     SLOW_LINK,//限流
     SUCCESS,//消息处理成功。该消息与 ack 消息是类似的，当服务器完成了客户端的命令后会返回该消息
     TIMEOUT,

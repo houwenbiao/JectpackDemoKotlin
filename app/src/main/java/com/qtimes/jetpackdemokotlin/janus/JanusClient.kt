@@ -486,6 +486,11 @@ class JanusClient(private val url: String) : WebSocketChannel.WebSocketCallback 
                         }
                     }
                 }
+                JanusMsgType.SLOWLINK -> {
+                    LogUtil.w("=======slowlink=======")
+                    janusCallback?.onSlowLink(handle!!.handleId)
+                }
+
                 JanusMsgType.HANGUP -> {
                     janusCallback?.onHangup(handle!!.handleId)
                 }

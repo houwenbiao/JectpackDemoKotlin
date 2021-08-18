@@ -61,6 +61,10 @@
     <string name="get_permission_success">获取权限成功！</string>
     <string name="get_permission_failed">获取权限失败！</string>
 
+    <!--button title-->
+    <string name="face_recognition">人脸识别</string>
+    <string name="video_call">呼叫</string>
+
 
     <!--二维码相关-->
     <string name="qr_code_text">二维码</string>

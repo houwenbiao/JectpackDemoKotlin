@@ -9,6 +9,8 @@ package com.qtimes.jetpackdemokotlin.ui.activity
 
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.Window
+import android.view.WindowManager
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -40,6 +42,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         mRxPermissions = RxPermissions(this)
         mRxPermissions.request(
             android.Manifest.permission.CAMERA,
