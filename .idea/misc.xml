@@ -15,10 +15,13 @@
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/drawable/btn_face_shape.xml" value="0.221875" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/drawable/ic_launcher_background.xml" value="0.221875" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.221875" />
+        <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/drawable/shape_bg_black.xml" value="0.221875" />
+        <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/drawable/welcome_btn_shape.xml" value="0.221875" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/layout/activity_main.xml" value="0.13269927536231885" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/layout/activity_welcome.xml" value="0.2015625" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/layout/fragment_janus.xml" value="0.268" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/layout/fragment_videocall.xml" value="0.2015625" />
+        <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/layout/videoroom_item.xml" value="0.2015625" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/menu/main_menu.xml" value="0.2015625" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.221875" />
         <entry key="..\:/Projects/JectpackDemoKotlin/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.221875" />

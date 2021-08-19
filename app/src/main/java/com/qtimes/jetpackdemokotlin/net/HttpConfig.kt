@@ -36,10 +36,10 @@ class HttpConfig {
         const val HOST_REGEX = "*.qtimes.cc"
 
         //Janus
-//        const val JANUS_URL = "ws://192.168.3.5:8888/ws"
-//        const val JANUS_ICE_URL = "stun:192.168.3.5:3478"
-        const val JANUS_URL = "ws://192.168.0.6:8188/ws"
-        const val JANUS_ICE_URL = "stun:192.168.0.6:3478"
+        const val JANUS_URL = "ws://192.168.4.4:8188/ws"
+        const val JANUS_ICE_URL = "stun:192.168.4.4:3478"
+//        const val JANUS_URL = "ws://192.168.0.6:8188/ws"
+//        const val JANUS_ICE_URL = "stun:192.168.0.6:3478"
     }
 
     /**
