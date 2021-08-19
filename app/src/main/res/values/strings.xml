@@ -64,7 +64,10 @@
     <!--button title-->
     <string name="face_recognition">人脸识别</string>
     <string name="video_call">呼叫</string>
-
+    <string name="video_cancel">取消</string>
+    <string name="video_hangup">挂断</string>
+    <string name="view_video">查看</string>
+    <string name="open_door">开门</string>
 
     <!--二维码相关-->
     <string name="qr_code_text">二维码</string>

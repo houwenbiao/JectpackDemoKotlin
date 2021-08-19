@@ -63,22 +63,24 @@ class JanusFragment : BaseFragment(), SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         //将所播放的视频图像输出到指定的SurfaceView组件
-        LogUtil.i("============surfaceCreated===========")
         mPlayer.setDisplay(holder)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        LogUtil.i("============surfaceChanged===========")
         mPlayer.start()
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        LogUtil.i("============surfaceDestroyed===========")
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mPlayer.pause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        LogUtil.i("============onDestroy===========")
         mPlayer.release()
     }
 }

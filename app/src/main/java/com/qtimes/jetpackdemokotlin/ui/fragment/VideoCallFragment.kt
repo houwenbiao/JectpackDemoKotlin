@@ -8,11 +8,15 @@
 package com.qtimes.jetpackdemokotlin.ui.fragment
 
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
+import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
+import com.google.gson.JsonObject
 import com.qtimes.jetpackdemokotlin.R
 import com.qtimes.jetpackdemokotlin.common.Const
 import com.qtimes.jetpackdemokotlin.common.JanusPlugin
@@ -26,12 +30,16 @@ import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItem
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItemHolder
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
+import kotlinx.coroutines.delay
 import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
+import tv.danmaku.ijk.media.player.IjkMediaPlayer
+import java.io.IOException
 import java.math.BigInteger
 
-class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCallback {
+class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCallback,
+    SurfaceHolder.Callback {
 
     companion object {
         const val TAG: String = "VideoCallFragment"
@@ -40,6 +48,8 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     val videoRoomViewModel: VideoRoomViewModel by getViewModel(VideoRoomViewModel::class.java)
     private lateinit var peerConnectionFactory: PeerConnectionFactory
     private lateinit var binding: FragmentVideocallBinding
+
+    private lateinit var mPlayer: IjkMediaPlayer
 
     private lateinit var audioTrack: AudioTrack
     private var mPeerConnection: PeerConnection? = null
@@ -54,14 +64,46 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
     private var videoItemList: MutableList<JanusVideoItem> = arrayListOf()
     private var adapter: VideoItemAdapter? = null
+    private var comingCallJsep: JSONObject? = null
+    private var comingCallName: String? = null
 
     private var videoItemLocal: JanusVideoItem? = null
     private var videoItemRemote: JanusVideoItem? = null
+    private var mCallingName = "2545c4bc9de9be93"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.btnHangup.setOnClickListener {
+            janusClient.hangup(videoCallHandlerId)
+            launchMain {
+                binding.clVideoComing.visibility = View.GONE
+            }
+        }
+
+        binding.btnViewVideo.setOnClickListener {
+            acceptCall(comingCallJsep)
+            launchMain {
+                binding.clVideoComing.visibility = View.GONE
+            }
+        }
+
+        binding.btnCancelCalling.setOnClickListener {
+            janusClient.hangup(videoCallHandlerId)
+            launchMain {
+                binding.clVideoComing.visibility = View.GONE
+                binding.clVideoCalling.visibility = View.GONE
+                binding.clMain.visibility = View.VISIBLE
+                mPlayer.start()
+            }
+        }
+
+        binding.btnVideoCall.setOnClickListener {
+            makeCall()
+        }
+
         eglBaseContext = EglBase.create().eglBaseContext
         binding.rvVideoCall.layoutManager = GridLayoutManager(mContext, 2)
+        binding.ijkSurfaceView.holder.addCallback(this)
         janusClient = JanusClient(HttpConfig.JANUS_URL)
         janusClient.setJanusCallback(this)
         videoCapturer = janusClient.createVideoCapturer(mContext!!, isFrontCamera)
@@ -85,11 +127,16 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         mPeerConnection?.addTrack(videoTrack)
         adapter = VideoItemAdapter()
         binding.rvVideoCall.adapter = adapter
+        initPlayer()
     }
 
     override fun bindingSetViewModels() {
         super.bindingSetViewModels()
         binding = viewDataBinding as FragmentVideocallBinding
+    }
+
+    override fun getLayoutId(): Int {
+        return R.layout.fragment_videocall
     }
 
     override fun onResume() {
@@ -101,12 +148,14 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         )
     }
 
-    override fun getLayoutId(): Int {
-        return R.layout.fragment_videocall
+    override fun onPause() {
+        super.onPause()
+        mPlayer.pause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        mPlayer.release()
         videoCapturer?.dispose()
         surfaceTextureHelper?.dispose()
         janusClient.disconnect()
@@ -120,7 +169,13 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     private fun makeCall() {
         PeerConnectionUtil.createOffer(mPeerConnection!!, object : CreateOfferCallback {
             override fun onCreateOfferSuccess(sdp: SessionDescription) {
-                janusClient.makeCall(videoCallHandlerId, sdp, "2545c4bc9de9be93")
+                janusClient.makeCall(videoCallHandlerId, sdp, mCallingName)
+                launchMain {
+                    mPlayer.pause()
+                    binding.clVideoCalling.visibility = View.VISIBLE
+                    binding.clMain.visibility = View.GONE
+                    binding.tvCallingName.text = "正在呼叫801..."
+                }
             }
 
             override fun onCreateFailed(error: String) {
@@ -129,6 +184,63 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         })
     }
 
+    private fun acceptCall(jsep: JSONObject?) {
+        if (jsep != null) {
+            val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
+            // 添加用户到界面
+            videoItemRemote = addNewVideoItem(
+                null,
+                comingCallName
+            )
+            launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
+
+            videoItemRemote?.peerConnection = mPeerConnection
+            mPeerConnection?.setRemoteDescription(
+                object : SdpObserver {
+                    override fun onCreateSuccess(sdp: SessionDescription) {
+
+                    }
+
+                    override fun onSetSuccess() {
+                        launchMain {
+                            LogUtil.d("videoCapturer: $videoCapturer")
+                            videoItemLocal =
+                                addNewVideoItem(
+                                    null,
+                                    videoRoomViewModel.userName.value
+                                )
+                            videoItemLocal?.peerConnection = mPeerConnection
+                            videoItemLocal?.videoTrack = videoTrack!!
+                            LogUtil.d("videoItem: ${videoItemRemote?.videoTrack}, videoTrack: $videoTrack")
+                            adapter!!.notifyItemInserted(videoItemList.size - 1)
+                        }
+
+                        PeerConnectionUtil.createAnswer(
+                            mPeerConnection!!,
+                            object : CreateAnswerCallback {
+                                override fun onSetAnswerSuccess(sdp: SessionDescription) {
+                                    janusClient.accept(videoCallHandlerId, sdp)
+                                }
+
+                                override fun onSetAnswerFailed(error: String) {
+
+                                }
+                            })
+                    }
+
+                    override fun onCreateFailure(error: String) {
+
+                    }
+
+                    override fun onSetFailure(error: String) {
+
+                    }
+                }, SessionDescription(
+                    SessionDescription.Type.OFFER, sdp
+                )
+            )
+        }
+    }
 
     /***************JanusCallback**************/
     override fun onCreateSession(sessionId: BigInteger?) {
@@ -159,8 +271,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     }
 
     override fun onSlowLink(handleId: BigInteger?) {
-        janusClient.disconnect()
-        mNavController.navigateUp()
+
     }
 
     @ExperimentalStdlibApi
@@ -181,20 +292,10 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                 when (JanusMsgType.fromString(event)) {
                     JanusMsgType.REGISTERED -> {
                         janusClient.list(videoCallHandlerId)
-                        makeCall()
                     }
 
                     JanusMsgType.CALLING -> {
                         LogUtil.d("calling--------")
-                        launchMain {
-                            showToast("正在呼叫......")
-                            LogUtil.d("onSetSuccess videoCapturer: $videoCapturer")
-                            videoItemLocal =
-                                addNewVideoItem(null, videoRoomViewModel.userName.value)
-                            videoItemLocal?.peerConnection = mPeerConnection
-                            videoItemLocal?.videoTrack = videoTrack
-                            adapter!!.notifyItemInserted(videoItemList.size - 1)
-                        }
                     }
 
                     JanusMsgType.UPDATE -> {
@@ -219,6 +320,17 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
                                     override fun onSetSuccess() {
                                         LogUtil.d("=====onSetSuccess=====")
+                                        launchMain {
+                                            LogUtil.d("onSetSuccess videoCapturer: $videoCapturer")
+                                            videoItemLocal =
+                                                addNewVideoItem(
+                                                    null,
+                                                    videoRoomViewModel.userName.value
+                                                )
+                                            videoItemLocal?.peerConnection = mPeerConnection
+                                            videoItemLocal?.videoTrack = videoTrack
+                                            adapter!!.notifyItemInserted(videoItemList.size - 1)
+                                        }
                                     }
 
                                     override fun onCreateFailure(error: String) {
@@ -233,6 +345,10 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                                 )
                             )
                         }
+                        launchMain {
+                            binding.clVideoCalling.visibility = View.GONE
+                            binding.rvVideoCall.visibility = View.VISIBLE
+                        }
                     }
 
                     JanusMsgType.EVENT -> {
@@ -240,61 +356,11 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                     }
 
                     JanusMsgType.INCOMINGCALL -> {
-                        if (jsep != null) {
-                            val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
-                            // 添加用户到界面
-                            videoItemRemote = addNewVideoItem(
-                                null,
-                                result.getString(JanusJsonKey.USERNAME.canonicalForm())
-                            )
-                            launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
-
-                            videoItemRemote?.peerConnection = mPeerConnection
-                            mPeerConnection?.setRemoteDescription(
-                                object : SdpObserver {
-                                    override fun onCreateSuccess(sdp: SessionDescription) {
-
-                                    }
-
-                                    override fun onSetSuccess() {
-                                        launchMain {
-                                            LogUtil.d("videoCapturer: $videoCapturer")
-                                            videoItemLocal =
-                                                addNewVideoItem(
-                                                    null,
-                                                    videoRoomViewModel.userName.value
-                                                )
-                                            videoItemLocal?.peerConnection = mPeerConnection
-                                            videoItemLocal?.videoTrack = videoTrack!!
-                                            LogUtil.d("videoItem: ${videoItemRemote?.videoTrack}, videoTrack: $videoTrack")
-                                            adapter!!.notifyItemInserted(videoItemList.size - 1)
-                                        }
-
-                                        PeerConnectionUtil.createAnswer(
-                                            mPeerConnection!!,
-                                            object : CreateAnswerCallback {
-                                                override fun onSetAnswerSuccess(sdp: SessionDescription) {
-                                                    janusClient.accept(handleId, sdp)
-                                                }
-
-                                                override fun onSetAnswerFailed(error: String) {
-
-                                                }
-                                            })
-                                    }
-
-                                    override fun onCreateFailure(error: String) {
-
-                                    }
-
-                                    override fun onSetFailure(error: String) {
-
-                                    }
-                                }, SessionDescription(
-                                    SessionDescription.Type.OFFER, sdp
-                                )
-                            )
+                        launchMain {
+                            binding.clVideoComing.visibility = View.VISIBLE
                         }
+                        comingCallJsep = jsep
+                        comingCallName = result.getString(JanusJsonKey.USERNAME.canonicalForm())
                     }
 
                     JanusMsgType.SLOW_LINK -> {
@@ -305,6 +371,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                     }
 
                     JanusMsgType.HANGUP -> {
+                        LogUtil.w("===========HANGUP===========")
                         launchMain {
                             val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
                             var index = 0
@@ -314,9 +381,10 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                                 adapter!!.notifyItemRemoved(index)
                                 index++
                             }
-                            janusClient.disconnect()
+                            binding.clMain.visibility = View.VISIBLE
+                            binding.rvVideoCall.visibility = View.GONE
+                            mPlayer.start()
                         }
-                        mNavController.navigateUp()
                     }
 
                     else -> {
@@ -326,10 +394,17 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
             }
         } catch (e: JSONException) {
             val error: String? = data.getString("error")
-            error?.let { err ->
+            error?.let {
                 launchMain {
-                    showToast(err)
-                    mNavController.navigateUp()
+                    binding.tvCallingName.text = "呼叫失败！"
+                    launchCPU {
+                        delay(2000)
+                        launchMain {
+                            binding.clVideoCalling.visibility = View.GONE
+                            binding.clMain.visibility = View.VISIBLE
+                            mPlayer.start()
+                        }
+                    }
                 }
             }
         }
@@ -435,5 +510,31 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         val videoItem = JanusVideoItem(userId, display)
         videoItemList.add(videoItem)
         return videoItem
+    }
+
+    private fun initPlayer() {
+        mPlayer = IjkMediaPlayer()
+        try {
+            val path = Environment.getExternalStorageDirectory().path + "/Movies/299495755-1-80.flv"
+            mPlayer.dataSource = path
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        mPlayer.isLooping = true
+        mPlayer.prepareAsync()
+        mPlayer.start()
+    }
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        //将所播放的视频图像输出到指定的SurfaceView组件
+        mPlayer.setDisplay(holder)
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+        mPlayer.start()
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
+
     }
 }

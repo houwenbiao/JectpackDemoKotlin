@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/janusFragment">
+    app:startDestination="@id/videoCallFragment">
 
     <!--此处的fragment id需要和menu中的一致才能保证正常跳转-->
     <fragment
