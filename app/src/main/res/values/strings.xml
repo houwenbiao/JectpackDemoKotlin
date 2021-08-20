@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">JectpackDemoKotlin</string>
+    <string name="app_name">智慧社区</string>
     <string name="please_input_city_name">请输入城市名称</string>
     <string name="janus">视频</string>
     <string name="construction">施工</string>

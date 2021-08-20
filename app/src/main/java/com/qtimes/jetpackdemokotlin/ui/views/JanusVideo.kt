@@ -42,9 +42,9 @@ class JanusVideoItemHolder(eglBaseContext: EglBase.Context, itemView: View) :
         surfaceViewRenderer.init(eglBaseContext, null)
         if (VideoCallFragment.BUILDING_DOOR) {
             rlBuildingDoorTalking.visibility = View.VISIBLE
-            rlEntryDoorTalking.visibility = View.GONE
+            rlEntryDoorTalking.visibility = View.INVISIBLE
         } else {
-            rlBuildingDoorTalking.visibility = View.GONE
+            rlBuildingDoorTalking.visibility = View.INVISIBLE
             rlEntryDoorTalking.visibility = View.VISIBLE
         }
     }

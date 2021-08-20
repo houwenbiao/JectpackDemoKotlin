@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
     <org.webrtc.SurfaceViewRenderer
         android:id="@+id/surface_view_render"
@@ -16,6 +15,7 @@
         android:layout_width="@dimen/x680"
         android:layout_height="@dimen/y250"
         android:layout_marginBottom="@dimen/y200"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
@@ -54,7 +54,7 @@
         android:layout_marginBottom="@dimen/y200"
         android:alpha="0.7"
         android:background="@drawable/shape_bg_black"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">

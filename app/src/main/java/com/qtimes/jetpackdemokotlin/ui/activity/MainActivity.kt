@@ -46,7 +46,8 @@ class MainActivity : BaseActivity() {
         mRxPermissions = RxPermissions(this)
         mRxPermissions.request(
             android.Manifest.permission.CAMERA,
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.RECORD_AUDIO
         ).subscribe {
             if (!it) {
                 showToast(getString(R.string.get_permission_failed))
