@@ -7,12 +7,12 @@
 
 package com.qtimes.jetpackdemokotlin.ui.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Environment
-import android.view.LayoutInflater
-import android.view.SurfaceHolder
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qtimes.jetpackdemokotlin.R
@@ -49,6 +49,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     private lateinit var binding: FragmentVideocallBinding
 
     private var mPlayer: IjkMediaPlayer? = null
+    private lateinit var inputMethodManager: InputMethodManager
 
     private lateinit var audioTrack: AudioTrack
     private var mPeerConnection: PeerConnection? = null
@@ -68,10 +69,15 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
     private var videoItemLocal: JanusVideoItem? = null
     private var videoItemRemote: JanusVideoItem? = null
+
     private var mCallingName = "2545c4bc9de9be93"
+//    private var mCallingName = "303534c6c4d7cb19"
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        inputMethodManager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         binding.btnHangup.setOnClickListener {
             janusClient.hangup(videoCallHandlerId)
             launchMain {
@@ -99,7 +105,31 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         }
 
         binding.btnVideoCall.setOnClickListener {
-            makeCall()
+            binding.clHomeNum.visibility = View.VISIBLE
+            binding.inputHomeNum.isFocusable = true
+            binding.inputHomeNum.isFocusableInTouchMode = true
+            binding.inputHomeNum.requestFocus()
+            inputMethodManager.showSoftInput(binding.inputHomeNum, 0)
+        }
+
+        binding.inputHomeNum.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.clHomeNum.visibility = View.GONE
+                inputMethodManager.hideSoftInputFromWindow(
+                    binding.inputHomeNum.applicationWindowToken,
+                    0
+                )
+                makeCall()
+            }
+            false
+        }
+
+        binding.clMain.setOnClickListener {
+            binding.clHomeNum.visibility = View.GONE
+            inputMethodManager.hideSoftInputFromWindow(
+                binding.inputHomeNum.applicationWindowToken,
+                0
+            )
         }
 
         eglBaseContext = EglBase.create().eglBaseContext
@@ -191,7 +221,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                     mPlayer?.pause()
                     binding.clVideoCalling.visibility = View.VISIBLE
                     binding.clMain.visibility = View.INVISIBLE
-                    binding.tvCallingName.text = "正在呼叫801..."
+                    binding.tvCallingName.text = "正在呼叫${binding.inputHomeNum.text.toString()}..."
                 }
             }
 

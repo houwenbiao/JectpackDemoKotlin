@@ -63,6 +63,30 @@
                 app:layout_constraintRight_toRightOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_home_num"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y765"
+            android:layout_gravity="bottom"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:imeOptions="actionDone"
+                android:id="@+id/input_home_num"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/y100"
+                android:background="#EAECE9"
+                android:hint="请输入门牌号"
+                android:inputType="number"
+                android:lines="1"
+                android:textAlignment="center"
+                android:textColor="#575A57"
+                android:textColorHint="#575A57"
+                android:textSize="@dimen/x36"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_video_calling"

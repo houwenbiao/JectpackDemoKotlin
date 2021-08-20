@@ -14,7 +14,7 @@
         android:id="@+id/rl_entrydoor_talking"
         android:layout_width="@dimen/x680"
         android:layout_height="@dimen/y250"
-        android:layout_marginBottom="@dimen/y200"
+        android:layout_marginBottom="@dimen/y160"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
