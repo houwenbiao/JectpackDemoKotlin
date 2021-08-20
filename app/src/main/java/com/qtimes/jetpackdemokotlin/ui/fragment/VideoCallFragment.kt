@@ -45,7 +45,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
     companion object {
         const val TAG: String = "VideoCallFragment"
-        const val BUILDING_DOOR: Boolean = true//是否是楼宇门端
+        const val BUILDING_DOOR: Boolean = false//是否是楼宇门端
     }
 
     val videoRoomViewModel: VideoRoomViewModel by getViewModel(VideoRoomViewModel::class.java)
@@ -64,7 +64,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     var eglBaseContext: EglBase.Context? = null
     private lateinit var janusClient: JanusClient
     var videoCallHandlerId: BigInteger = BigInteger("0")
-    private var isFrontCamera: Boolean = true
+    private var isFrontCamera: Boolean = false
 
     private var videoItemList: MutableList<JanusVideoItem> = arrayListOf()
     private var adapter: VideoItemAdapter? = null
@@ -74,14 +74,21 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     private var videoItemLocal: JanusVideoItem? = null
     private var videoItemRemote: JanusVideoItem? = null
 
-    private var mCallingName = "2545c4bc9de9be93"
-//    private var mCallingName = "3dde9b423f10e3c4"
+    //    private var mCallingName = "2545c4bc9de9be93"
+    private var mCallingName = "3dde9b423f10e3c4"
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         inputMethodManager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        if (!BUILDING_DOOR) {
+            binding.btnFaceRecognition.visibility = View.GONE
+            binding.btnVideoCall.visibility = View.GONE
+        }
+
+
         binding.btnHangup.setOnClickListener {
             janusClient.hangup(videoCallHandlerId)
             launchCPU {
@@ -93,7 +100,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                 }
             }
             launchMain {
-                binding.clVideoComing.visibility = View.INVISIBLE
+                binding.clVideoComing.visibility = View.GONE
             }
         }
 
@@ -105,7 +112,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
             acceptCall(comingCallJsep)
             launchMain {
                 binding.clVideo.visibility = View.VISIBLE
-                binding.clVideoComing.visibility = View.INVISIBLE
+                binding.clVideoComing.visibility = View.GONE
                 binding.clMain.visibility = View.INVISIBLE
             }
         }
@@ -113,7 +120,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         binding.btnCancelCalling.setOnClickListener {
             janusClient.hangup(videoCallHandlerId)
             launchMain {
-                binding.clVideoComing.visibility = View.INVISIBLE
+                binding.clVideoComing.visibility = View.GONE
                 binding.clVideoCalling.visibility = View.INVISIBLE
                 binding.clMain.visibility = View.VISIBLE
                 mPlayer?.start()
@@ -180,6 +187,8 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         }
         audioTrack = peerConnectionFactory.createAudioTrack("101", audioSource)
         audioTrack.setEnabled(true)
+
+        LogUtil.i("============$")
         videoTrack = peerConnectionFactory.createVideoTrack("102", videoSource)
         videoTrack?.setEnabled(true)
 
@@ -224,6 +233,9 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         videoCapturer?.dispose()
         surfaceTextureHelper?.dispose()
         janusClient.disconnect()
+        videoSource?.dispose()
+        videoTrack?.dispose()
+        mPeerConnection?.close()
         videoItemList.stream().forEach {
             it.peerConnection?.close()
             it.videoTrack?.dispose()
@@ -237,6 +249,9 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         releaseJanus()
     }
 
+    /**
+     * 呼叫对方
+     */
     private fun makeCall() {
         PeerConnectionUtil.createOffer(mPeerConnection!!, object : CreateOfferCallback {
             override fun onCreateOfferSuccess(sdp: SessionDescription) {
@@ -255,7 +270,9 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         })
     }
 
-    //接受对方呼叫
+    /**
+     * 接受对方呼叫
+     */
     private fun acceptCall(jsep: JSONObject?) {
         if (jsep != null) {
             val sdp = jsep.getString(JanusJsonKey.SDP.canonicalForm())
@@ -265,6 +282,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                 comingCallName
             )
             launchMain { adapter!!.notifyItemInserted(videoItemList.size - 1) }
+
             videoItemRemote?.peerConnection = mPeerConnection
             mPeerConnection?.setRemoteDescription(
                 object : SdpObserver {
@@ -457,7 +475,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                             binding.clVideo.visibility = View.INVISIBLE
                             binding.clMain.visibility = View.VISIBLE
                             binding.clVideoCalling.visibility = View.INVISIBLE
-                            binding.clVideoComing.visibility = View.INVISIBLE
+                            binding.clVideoComing.visibility = View.GONE
                             val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
                             var index = 0
                             while (it.hasNext()) {
@@ -560,6 +578,12 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
             }
             itemHolder.btnEntrydoorHangup.setOnClickListener {
                 janusClient.hangup(videoCallHandlerId)
+            }
+
+            itemHolder.btnOpenDoor.setOnClickListener {
+                launchMain {
+                    showToast("门已打开")
+                }
             }
 
             itemHolder.tvSwitchCamera.setOnClickListener {

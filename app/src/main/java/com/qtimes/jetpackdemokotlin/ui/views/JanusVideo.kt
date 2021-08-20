@@ -37,6 +37,7 @@ class JanusVideoItemHolder(eglBaseContext: EglBase.Context, itemView: View) :
     var rlBuildingDoorTalking: RelativeLayout = itemView.findViewById(R.id.rl_buildingdoor_talking)
     var rlEntryDoorTalking: ConstraintLayout = itemView.findViewById(R.id.rl_entrydoor_talking)
     var btnEntrydoorHangup: Button = itemView.findViewById(R.id.btn_entrydoor_hangup)
+    var btnOpenDoor: Button = itemView.findViewById(R.id.btn_open_door)
 
     init {
         surfaceViewRenderer.init(eglBaseContext, null)

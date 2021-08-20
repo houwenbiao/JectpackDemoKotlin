@@ -71,12 +71,12 @@
             android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:imeOptions="actionDone"
                 android:id="@+id/input_home_num"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y100"
                 android:background="#EAECE9"
                 android:hint="请输入门牌号"
+                android:imeOptions="actionDone"
                 android:inputType="number"
                 android:lines="1"
                 android:textAlignment="center"
