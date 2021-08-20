@@ -2,8 +2,11 @@ package com.qtimes.jetpackdemokotlin.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.provider.Settings
+import com.qtimes.jetpackdemokotlin.common.MainApplication
 import java.io.BufferedReader
 import java.io.FileReader
 import java.io.IOException
@@ -109,5 +112,25 @@ object AndroidUtil {
     @SuppressLint("HardwareIds")
     fun getAndroidId(context: Context): String {
         return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+    }
+
+
+    /**
+     * 判断本地已经安装好了指定的应用程序包
+     *
+     * @param packageNameTarget ：App 包名
+     * @return 已安装时返回 true,不存在时返回 false
+     */
+    fun appIsExist(packageNameTarget: String): Boolean {
+        val packageManager: PackageManager = MainApplication.context.getPackageManager()
+        val packageInfoList =
+            packageManager.getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES)
+        for (packageInfo in packageInfoList) {
+            val packageNameSource = packageInfo.packageName
+            if (packageNameSource == packageNameTarget) {
+                return true
+            }
+        }
+        return false
     }
 }

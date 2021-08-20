@@ -8,11 +8,14 @@
 package com.qtimes.jetpackdemokotlin.ui.fragment
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qtimes.jetpackdemokotlin.R
@@ -26,6 +29,7 @@ import com.qtimes.jetpackdemokotlin.net.HttpConfig
 import com.qtimes.jetpackdemokotlin.ui.base.BaseFragment
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItem
 import com.qtimes.jetpackdemokotlin.ui.views.JanusVideoItemHolder
+import com.qtimes.jetpackdemokotlin.utils.AndroidUtil
 import com.qtimes.jetpackdemokotlin.utils.LogUtil
 import com.qtimes.jetpackdemokotlin.viewmodel.VideoRoomViewModel
 import kotlinx.coroutines.delay
@@ -71,7 +75,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     private var videoItemRemote: JanusVideoItem? = null
 
     private var mCallingName = "2545c4bc9de9be93"
-//    private var mCallingName = "303534c6c4d7cb19"
+//    private var mCallingName = "3dde9b423f10e3c4"
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -80,9 +84,21 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         binding.btnHangup.setOnClickListener {
             janusClient.hangup(videoCallHandlerId)
+            launchCPU {
+                delay(500)
+                releaseJanus()
+                delay(2500)
+                launchMain {
+                    initJanus()
+                }
+            }
             launchMain {
                 binding.clVideoComing.visibility = View.INVISIBLE
             }
+        }
+
+        binding.btnFaceRecognition.setOnClickListener {
+            startLocalApp("org.tensorflow.lite.examples.detection")
         }
 
         binding.btnViewVideo.setOnClickListener {
@@ -139,6 +155,14 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         janusClient = JanusClient(HttpConfig.JANUS_URL)
         janusClient.setJanusCallback(this)
         initJanus()
+    }
+
+    private fun startLocalApp(packageNameTarget: String) {
+        if (AndroidUtil.appIsExist(packageNameTarget)) {
+            val packageManager: PackageManager = mContext!!.getPackageManager()
+            val intent = packageManager.getLaunchIntentForPackage(packageNameTarget)
+            startActivity(intent)
+        }
     }
 
     private fun initJanus() {
@@ -411,6 +435,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
                     JanusMsgType.INCOMINGCALL -> {
                         launchMain {
+                            binding.clMain.visibility = View.INVISIBLE
                             binding.clVideoComing.visibility = View.VISIBLE
                             mPlayer?.pause()
                         }
@@ -432,6 +457,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                             binding.clVideo.visibility = View.INVISIBLE
                             binding.clMain.visibility = View.VISIBLE
                             binding.clVideoCalling.visibility = View.INVISIBLE
+                            binding.clVideoComing.visibility = View.INVISIBLE
                             val it: MutableIterator<JanusVideoItem> = videoItemList.iterator()
                             var index = 0
                             while (it.hasNext()) {
