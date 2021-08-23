@@ -8,17 +8,16 @@
 package com.qtimes.jetpackdemokotlin.ui.fragment
 
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qtimes.jetpackdemokotlin.R
+import com.qtimes.jetpackdemokotlin.audio.Player
 import com.qtimes.jetpackdemokotlin.common.Const
 import com.qtimes.jetpackdemokotlin.common.JanusPlugin
 import com.qtimes.jetpackdemokotlin.databinding.FragmentVideocallBinding
@@ -52,7 +51,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     private lateinit var peerConnectionFactory: PeerConnectionFactory
     private lateinit var binding: FragmentVideocallBinding
 
-    private var mPlayer: IjkMediaPlayer? = null
+    private var ijkMediaPlayer: IjkMediaPlayer? = null
     private lateinit var inputMethodManager: InputMethodManager
 
     private lateinit var audioTrack: AudioTrack
@@ -73,6 +72,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
     private var videoItemLocal: JanusVideoItem? = null
     private var videoItemRemote: JanusVideoItem? = null
+    private var mPlayer: Player? = null
 
     //    private var mCallingName = "2545c4bc9de9be93"
     private var mCallingName = "3dde9b423f10e3c4"
@@ -100,6 +100,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                 }
             }
             launchMain {
+                mPlayer?.stop()
                 binding.clVideoComing.visibility = View.GONE
             }
         }
@@ -111,6 +112,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
         binding.btnViewVideo.setOnClickListener {
             acceptCall(comingCallJsep)
             launchMain {
+                mPlayer?.stop()
                 binding.clVideo.visibility = View.VISIBLE
                 binding.clVideoComing.visibility = View.GONE
                 binding.clMain.visibility = View.INVISIBLE
@@ -123,7 +125,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                 binding.clVideoComing.visibility = View.GONE
                 binding.clVideoCalling.visibility = View.INVISIBLE
                 binding.clMain.visibility = View.VISIBLE
-                mPlayer?.start()
+                ijkMediaPlayer?.start()
             }
         }
 
@@ -226,7 +228,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
     override fun onPause() {
         super.onPause()
-        mPlayer?.pause()
+        ijkMediaPlayer?.pause()
     }
 
     private fun releaseJanus() {
@@ -246,6 +248,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     override fun onDestroy() {
         super.onDestroy()
         mPlayer?.release()
+        ijkMediaPlayer?.release()
         releaseJanus()
     }
 
@@ -257,7 +260,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
             override fun onCreateOfferSuccess(sdp: SessionDescription) {
                 janusClient.makeCall(videoCallHandlerId, sdp, mCallingName)
                 launchMain {
-                    mPlayer?.pause()
+                    ijkMediaPlayer?.pause()
                     binding.clVideoCalling.visibility = View.VISIBLE
                     binding.clMain.visibility = View.INVISIBLE
                     binding.tvCallingName.text = "正在呼叫${binding.inputHomeNum.text.toString()}..."
@@ -453,9 +456,10 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
 
                     JanusMsgType.INCOMINGCALL -> {
                         launchMain {
+                            mPlayer?.play(R.raw.call_coming)
                             binding.clMain.visibility = View.INVISIBLE
                             binding.clVideoComing.visibility = View.VISIBLE
-                            mPlayer?.pause()
+                            ijkMediaPlayer?.pause()
                         }
                         comingCallJsep = jsep
                         comingCallName = result.getString(JanusJsonKey.USERNAME.canonicalForm())
@@ -484,7 +488,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                                 adapter?.notifyItemRemoved(index)
                                 index++
                             }
-                            mPlayer?.start()
+                            ijkMediaPlayer?.start()
                             launchCPU {
                                 delay(500)
                                 releaseJanus()
@@ -511,7 +515,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                         launchMain {
                             binding.clVideoCalling.visibility = View.INVISIBLE
                             binding.clMain.visibility = View.VISIBLE
-                            mPlayer?.start()
+                            ijkMediaPlayer?.start()
                         }
                     }
                 }
@@ -632,25 +636,26 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
     }
 
     private fun initPlayer() {
-        mPlayer = IjkMediaPlayer()
+        mPlayer = Player(mContext!!)
+        ijkMediaPlayer = IjkMediaPlayer()
         try {
             val path = Environment.getExternalStorageDirectory().path + "/Movies/299495755-1-80.flv"
-            mPlayer?.dataSource = path
+            ijkMediaPlayer?.dataSource = path
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        mPlayer?.isLooping = true
-        mPlayer?.prepareAsync()
-        mPlayer?.start()
+        ijkMediaPlayer?.isLooping = true
+        ijkMediaPlayer?.prepareAsync()
+        ijkMediaPlayer?.start()
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         //将所播放的视频图像输出到指定的SurfaceView组件
-        mPlayer?.setDisplay(holder)
+        ijkMediaPlayer?.setDisplay(holder)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        mPlayer?.start()
+        ijkMediaPlayer?.start()
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
