@@ -30,6 +30,21 @@
         </activity>
 
         <activity android:name=".ui.activity.WelcomeActivity" />
+
+        <!--开机启动-->
+        <receiver
+            android:name=".app.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <!--开机广播-->
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+            <intent-filter>
+                <!-- 关机广播 -->
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

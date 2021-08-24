@@ -476,6 +476,7 @@ class VideoCallFragment : BaseFragment(), JanusCallback, CreatePeerConnectionCal
                         LogUtil.w("===========HANGUP===========")
                         launchMain {
                             showToast("已挂断！")
+                            mPlayer?.stop()
                             binding.clVideo.visibility = View.INVISIBLE
                             binding.clMain.visibility = View.VISIBLE
                             binding.clVideoCalling.visibility = View.INVISIBLE
